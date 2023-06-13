@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33712.159
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kiseki.Launcher", "Kiseki.Launcher\Kiseki.Launcher.csproj", "{BE53015E-6EB9-42F7-BA80-887D0A5F9977}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kiseki.Launcher.Windows", "Kiseki.Launcher.Windows\Kiseki.Launcher.Windows.csproj", "{38AAA6A8-C482-4F17-816F-E0A42B065033}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kiseki.Launcher.Linux", "Kiseki.Launcher.Linux\Kiseki.Launcher.Linux.csproj", "{40AB861A-C06C-4279-86F6-EC60BEC2C690}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Kiseki.Launcher.Core", "Kiseki.Launcher.Core\Kiseki.Launcher.Core.shproj", "{9DA0F813-6151-496B-B907-C94A7B6A3889}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +15,24 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{BE53015E-6EB9-42F7-BA80-887D0A5F9977}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BE53015E-6EB9-42F7-BA80-887D0A5F9977}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BE53015E-6EB9-42F7-BA80-887D0A5F9977}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BE53015E-6EB9-42F7-BA80-887D0A5F9977}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38AAA6A8-C482-4F17-816F-E0A42B065033}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38AAA6A8-C482-4F17-816F-E0A42B065033}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38AAA6A8-C482-4F17-816F-E0A42B065033}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38AAA6A8-C482-4F17-816F-E0A42B065033}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40AB861A-C06C-4279-86F6-EC60BEC2C690}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40AB861A-C06C-4279-86F6-EC60BEC2C690}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40AB861A-C06C-4279-86F6-EC60BEC2C690}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40AB861A-C06C-4279-86F6-EC60BEC2C690}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {E283B6E8-7F09-414D-AA9C-0725447DC36B}
+		SolutionGuid = {E7B8D704-EF09-4D85-998B-ED22ECD4D09F}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Kiseki.Launcher.Core\Kiseki.Launcher.Core.projitems*{38aaa6a8-c482-4f17-816f-e0a42b065033}*SharedItemsImports = 5
+		Kiseki.Launcher.Core\Kiseki.Launcher.Core.projitems*{40ab861a-c06c-4279-86f6-ec60bec2c690}*SharedItemsImports = 5
+		Kiseki.Launcher.Core\Kiseki.Launcher.Core.projitems*{9da0f813-6151-496b-b907-c94a7b6a3889}*SharedItemsImports = 13
 	EndGlobalSection
 EndGlobal
