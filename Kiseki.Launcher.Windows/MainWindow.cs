@@ -32,8 +32,19 @@ namespace Kiseki.Launcher.Windows
             this.Controller.ProgressBarChanged += Controller_ProgressBarChanged;
             this.Controller.ProgressBarStateChanged += Controller_ProgressBarStateChanged;
             this.Controller.Launched += Controller_Launched;
+            
+            this.Page.Destroyed += (s, e) =>
+            {
+                this.Controller.Dispose();
+                Environment.Exit(0);
+            };
 
             this.ShowProgressDialog();
+        }
+
+        private void CloseButton_Click(object? sender, EventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         private void Controller_PageHeadingChanged(object sender, string Heading)

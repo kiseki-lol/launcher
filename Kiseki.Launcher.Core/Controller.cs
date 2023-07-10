@@ -65,6 +65,11 @@ namespace Kiseki.Launcher.Core
             this.OnLaunched();
         }
 
+        public async void Dispose()
+        {
+            //
+        }
+
         protected virtual void OnPageHeadingChange(string Heading)
         {
             PageHeadingChanged.Invoke(this, Heading);
