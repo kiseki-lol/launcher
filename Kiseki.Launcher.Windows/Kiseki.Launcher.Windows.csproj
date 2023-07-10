@@ -9,7 +9,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Version>1.0.0</Version>
     <FileVersion>1.0.0.0</FileVersion>
-    <AssemblyName>Kiseki.Launcher</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -39,5 +38,11 @@
     </None>
   </ItemGroup>
 
+  <Target Name="Rename" AfterTargets="AfterBuild">
+    <Move SourceFiles="$(OUTDIR)\Kiseki.Launcher.Windows.exe" DestinationFiles="$(OUTDIR)\Kiseki.Launcher.exe" />
+    <Move SourceFiles="$(OUTDIR)\Kiseki.Launcher.Windows.pdb" DestinationFiles="$(OUTDIR)\Kiseki.Launcher.pdb" />
+  </Target>
+
   <Import Project="..\Kiseki.Launcher.Core\Kiseki.Launcher.Core.projitems" Label="Shared" />
+
 </Project>
