@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace Kiseki.Launcher.Core
+﻿namespace Kiseki.Launcher.Core
 {
     public enum ProgressBarState
     {

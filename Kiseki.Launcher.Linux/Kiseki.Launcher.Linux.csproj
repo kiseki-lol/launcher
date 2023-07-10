@@ -16,7 +16,6 @@
 
   <ItemGroup>
     <PackageReference Include="GtkSharp" Version="3.24.24.95" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <Import Project="..\Kiseki.Launcher.Core\Kiseki.Launcher.Core.projitems" Label="Shared" />
