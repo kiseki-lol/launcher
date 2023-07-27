@@ -5,8 +5,6 @@ VisualStudioVersion = 17.6.33712.159
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kiseki.Launcher.Windows", "Kiseki.Launcher.Windows\Kiseki.Launcher.Windows.csproj", "{38AAA6A8-C482-4F17-816F-E0A42B065033}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kiseki.Launcher.Linux", "Kiseki.Launcher.Linux\Kiseki.Launcher.Linux.csproj", "{40AB861A-C06C-4279-86F6-EC60BEC2C690}"
-EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Kiseki.Launcher.Core", "Kiseki.Launcher.Core\Kiseki.Launcher.Core.shproj", "{9DA0F813-6151-496B-B907-C94A7B6A3889}"
 EndProject
 Global
