@@ -25,6 +25,7 @@ jobs:
         path: publish/win-x64/*
   
   release:
+    name: Release
     needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tag/v')
