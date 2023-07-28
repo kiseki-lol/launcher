@@ -2,7 +2,7 @@ namespace Kiseki.Launcher
 {
     interface IProtocolHandler
     {
-        void Register();
+        void Register(string handler);
         void Unregister();
     }
 
