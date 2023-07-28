@@ -8,6 +8,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>Resources\IconKiseki.ico</ApplicationIcon>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Copyright>Kiseki</Copyright>
     <Version>1.0.0</Version>
     <FileVersion>1.0.0.0</FileVersion>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
