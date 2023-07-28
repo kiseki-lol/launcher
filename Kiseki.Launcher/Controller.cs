@@ -1,4 +1,4 @@
-﻿namespace Kiseki.Launcher.Core
+namespace Kiseki.Launcher
 {
     public enum ProgressBarState
     {

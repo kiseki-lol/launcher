@@ -1,5 +1,4 @@
 ﻿using Kiseki.Launcher.Windows.Properties;
-using Kiseki.Launcher.Core;
 
 namespace Kiseki.Launcher.Windows
 {
@@ -27,7 +26,7 @@ namespace Kiseki.Launcher.Windows
                 Buttons = { this.CloseButton }
             };
 
-            this.Controller = new Controller("kiseki.lol", args);
+            this.Controller = new Launcher.Controller("kiseki.lol", args);
             this.Controller.PageHeadingChanged += Controller_PageHeadingChanged;
             this.Controller.ProgressBarChanged += Controller_ProgressBarChanged;
             this.Controller.ProgressBarStateChanged += Controller_ProgressBarStateChanged;

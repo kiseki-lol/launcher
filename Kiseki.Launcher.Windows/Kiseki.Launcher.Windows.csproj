@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net7.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <PublishSingleFile>true</PublishSingleFile>
     <UseWindowsForms>true</UseWindowsForms>
@@ -40,11 +40,7 @@
     </None>
   </ItemGroup>
 
-  <Target Name="Rename" AfterTargets="AfterBuild">
-    <Move SourceFiles="$(OUTDIR)\Kiseki.Launcher.Windows.exe" DestinationFiles="$(OUTDIR)\Kiseki.Launcher.exe" />
-    <Move SourceFiles="$(OUTDIR)\Kiseki.Launcher.Windows.pdb" DestinationFiles="$(OUTDIR)\Kiseki.Launcher.pdb" />
-  </Target>
-
-  <Import Project="..\Kiseki.Launcher.Core\Kiseki.Launcher.Core.projitems" Label="Shared" />
-
+  <ItemGroup>
+    <Compile Include="..\Kiseki.Launcher\*.cs" LinkBase="Shared" />
+  </ItemGroup>
 </Project>
