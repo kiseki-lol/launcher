@@ -20,6 +20,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    
     <Compile Update="Properties\Settings.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>
@@ -42,6 +43,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Kiseki.Launcher\*.cs" LinkBase="Shared" />
+    <Compile Include="..\Kiseki.Launcher\*.cs" />
   </ItemGroup>
 </Project>
