@@ -46,17 +46,17 @@ namespace Kiseki.Launcher.Windows
             throw new NotImplementedException();
         }
 
-        private void Controller_PageHeadingChanged(object sender, string Heading)
+        private void Controller_PageHeadingChanged(object? sender, string Heading)
         {
             Page.Heading = Heading;
         }
 
-        private void Controller_ProgressBarChanged(object sender, int Value)
+        private void Controller_ProgressBarChanged(object? sender, int Value)
         {
             Page.ProgressBar!.Value = Value;
         }
 
-        private void Controller_ProgressBarStateChanged(object sender, ProgressBarState State)
+        private void Controller_ProgressBarStateChanged(object? sender, ProgressBarState State)
         {
             Page.ProgressBar!.State = State switch
             {
@@ -66,7 +66,7 @@ namespace Kiseki.Launcher.Windows
             };
         }
 
-        private void Controller_Launched(object sender, EventArgs e)
+        private void Controller_Launched(object? sender, EventArgs e)
         {
             Environment.Exit(0);
         }
