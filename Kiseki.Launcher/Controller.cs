@@ -11,10 +11,10 @@ namespace Kiseki.Launcher
         private readonly string BaseURL;
         private readonly string[] Arguments;
 
-        public event EventHandler<string> PageHeadingChanged;
-        public event EventHandler<int> ProgressBarChanged;
-        public event EventHandler<ProgressBarState> ProgressBarStateChanged;
-        public event EventHandler Launched;
+        public event EventHandler<string>? PageHeadingChanged;
+        public event EventHandler<int>? ProgressBarChanged;
+        public event EventHandler<ProgressBarState>? ProgressBarStateChanged;
+        public event EventHandler? Launched;
 
         public Controller(string BaseURL, string[] Arguments)
         {
@@ -70,22 +70,22 @@ namespace Kiseki.Launcher
 
         protected virtual void OnPageHeadingChange(string Heading)
         {
-            PageHeadingChanged.Invoke(this, Heading);
+            PageHeadingChanged!.Invoke(this, Heading);
         }
 
         protected virtual void OnProgressBarChange(int Value)
         {
-            ProgressBarChanged.Invoke(this, Value);
+            ProgressBarChanged!.Invoke(this, Value);
         }
 
         protected virtual void OnProgressBarStateChanged(ProgressBarState State)
         {
-            ProgressBarStateChanged.Invoke(this, State);
+            ProgressBarStateChanged!.Invoke(this, State);
         }
 
         protected virtual void OnLaunched()
         {
-            Launched.Invoke(this, EventArgs.Empty);
+            Launched!.Invoke(this, EventArgs.Empty);
         }
     }
 }
