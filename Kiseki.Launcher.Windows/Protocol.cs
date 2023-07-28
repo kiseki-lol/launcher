@@ -2,7 +2,7 @@ using Microsoft.Win32;
 
 namespace Kiseki.Launcher.Windows
 {
-    public class ProtocolHandler : IProtocolHandler
+    public class Protocol : IProtocol
     {
         public void Register(string key, string name, string handler)
         {
