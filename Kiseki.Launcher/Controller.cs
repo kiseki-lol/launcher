@@ -24,19 +24,19 @@ namespace Kiseki.Launcher
         
         public async void Start()
         {
-            this.OnPageHeadingChange("Connecting to Kiseki...");
+            OnPageHeadingChange("Connecting to Kiseki...");
 
             bool marquee = true;
             await foreach (int progressValue in StreamBackgroundOperationProgressAsync())
             {
                 if (marquee)
                 {
-                    this.OnPageHeadingChange("Downloading Kiseki...");
-                    this.OnProgressBarStateChanged(ProgressBarState.Normal);
+                    OnPageHeadingChange("Downloading Kiseki...");
+                    OnProgressBarStateChanged(ProgressBarState.Normal);
                     marquee = false;
                 }
 
-                this.OnProgressBarChange(progressValue);
+                OnProgressBarChange(progressValue);
             }
 
             static async IAsyncEnumerable<int> StreamBackgroundOperationProgressAsync()
@@ -50,22 +50,22 @@ namespace Kiseki.Launcher
                 }
             }
 
-            this.OnPageHeadingChange("Installing Kiseki...");
-            this.OnProgressBarStateChanged(ProgressBarState.Marquee);
+            OnPageHeadingChange("Installing Kiseki...");
+            OnProgressBarStateChanged(ProgressBarState.Marquee);
 
             await Task.Delay(2200);
-            this.OnPageHeadingChange("Configuring Kiseki...");
+            OnPageHeadingChange("Configuring Kiseki...");
 
             await Task.Delay(1200);
-            this.OnPageHeadingChange("Launching Kiseki...");
+            OnPageHeadingChange("Launching Kiseki...");
 
             await Task.Delay(3000);
-            this.OnLaunched();
+            OnLaunched();
         }
 
         public async void Dispose()
         {
-            //
+            // TODO: This will only be called when the user closes the window OR we're done (i.e. the Launched event is called.)
         }
 
         protected virtual void OnPageHeadingChange(string Heading)

@@ -3,7 +3,7 @@
 namespace Kiseki.Launcher.Windows
 {
     [System.ComponentModel.DesignerCategory("")]
-    public class MainWindow : Form
+    public class MainWindow : Form, IMainWindow
     {
         private readonly TaskDialogButton CloseButton;
         private readonly TaskDialogPage Page;
@@ -82,6 +82,21 @@ namespace Kiseki.Launcher.Windows
             };
 
             TaskDialog.ShowDialog(Page);
+        }
+
+        public void Register()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Unregister()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void CreateShortcuts()
+        {
+            throw new NotImplementedException();
         }
     }
 }
