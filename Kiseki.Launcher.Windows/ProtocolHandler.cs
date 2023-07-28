@@ -1,40 +1,38 @@
-using System.Windows;
-
 using Microsoft.Win32;
 
 namespace Kiseki.Launcher.Windows
 {
     public class ProtocolHandler : IProtocolHandler
     {
-        public void Register(string handler)
+        public void Register(string key, string name, string handler)
         {
             string arguments = $"\"{handler}\" \"%1\"";
 
-            RegistryKey uri = Registry.CurrentUser.CreateSubKey(@"Software\Classes\kiseki");
-            RegistryKey icon = uri.CreateSubKey("DefaultIcon");
-            RegistryKey command = uri.CreateSubKey(@"shell\open\command");
+            RegistryKey uriKey = Registry.CurrentUser.CreateSubKey(@$"Software\Classes\{key}");
+            RegistryKey uriIconKey = uriKey.CreateSubKey("DefaultIcon");
+            RegistryKey uriCommandKey = uriKey.CreateSubKey(@"shell\open\command");
 
-            if (uri.GetValue("") is null)
+            if (uriKey.GetValue("") is null)
             {
-                uri.SetValue("", "URL: Kiseki Protocol");
-                uri.SetValue("URL Protocol", "");
+                uriKey.SetValue("", $"URL: {name} Protocol");
+                uriKey.SetValue("URL Protocol", "");
             }
 
-            if ((string?)command.GetValue("") != arguments)
+            if ((string?)uriCommandKey.GetValue("") != arguments)
             {
-                command.SetValue("", arguments);
+                uriCommandKey.SetValue("", arguments);
             }
 
-            uri.Close();
-            icon.Close();
-            command.Close();
+            uriKey.Close();
+            uriIconKey.Close();
+            uriCommandKey.Close();
         }
 
-        public void Unregister()
+        public void Unregister(string key)
         {
             try
             {
-                Registry.CurrentUser.DeleteSubKeyTree(@"Software\Classes\kiseki");
+                Registry.CurrentUser.DeleteSubKeyTree(@$"Software\Classes\{key}");
             }
             catch (Exception)
             {
