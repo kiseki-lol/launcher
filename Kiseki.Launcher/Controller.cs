@@ -1,3 +1,5 @@
+using Kiseki.Launcher.Helpers;
+
 namespace Kiseki.Launcher
 {
     public enum ProgressBarState
@@ -9,7 +11,7 @@ namespace Kiseki.Launcher
     public class Controller
     {
         private readonly string BaseURL;
-        private IDictionary<string, string> Arguments = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> Arguments = new();
 
         public event EventHandler<string>? OnPageHeadingChanged;
         public event EventHandler<int>? OnProgressBarChanged;
@@ -25,14 +27,14 @@ namespace Kiseki.Launcher
             if (args.Length > 0)
             {
                 // TODO: handle these more gracefully
-
                 if (!Helpers.Base64.IsBase64String(args[0]))
                 {
                     Environment.Exit(0);
                 }
 
+                // TODO: the payload will soon include more members, such as whether to open the IDE or not (as well as values required for our weird loopback authentication thing)
                 string payload = Helpers.Base64.ConvertBase64ToString(args[0]);
-                if (payload.Split("|").Length != 2) // joinscripturl, ticket; TODO: this will also include launchmode (ide/play) & other stuff
+                if (payload.Split("|").Length != 2)
                 {
                     Environment.Exit(0);
                 }
@@ -46,6 +48,13 @@ namespace Kiseki.Launcher
         {
             PageHeadingChange("Connecting to Kiseki...");
             
+            var response = await Http.GetJson<Models.Health>($"https://{BaseURL}/api/health");
+            if (response is null)
+            {
+                PageHeadingChange("Failed to connect");
+                return;
+            }
+
             bool marquee = true;
             await foreach (int progressValue in StreamBackgroundOperationProgressAsync())
             {
