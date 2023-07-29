@@ -11,10 +11,10 @@ namespace Kiseki.Launcher
         private readonly string BaseURL;
         private IDictionary<string, string> Arguments = new Dictionary<string, string>();
 
-        public event EventHandler<string>? PageHeadingChanged;
-        public event EventHandler<int>? ProgressBarChanged;
-        public event EventHandler<ProgressBarState>? ProgressBarStateChanged;
-        public event EventHandler? Launched;
+        public event EventHandler<string>? OnPageHeadingChanged;
+        public event EventHandler<int>? OnProgressBarChanged;
+        public event EventHandler<ProgressBarState>? OnProgressBarStateChanged;
+        public event EventHandler? OnLaunched;
 
         public static readonly HttpClient HttpClient = new();
 
@@ -44,19 +44,19 @@ namespace Kiseki.Launcher
         
         public async void Start()
         {
-            OnPageHeadingChange("Connecting to Kiseki...");
-
+            PageHeadingChange("Connecting to Kiseki...");
+            
             bool marquee = true;
             await foreach (int progressValue in StreamBackgroundOperationProgressAsync())
             {
                 if (marquee)
                 {
-                    OnPageHeadingChange("Downloading Kiseki...");
-                    OnProgressBarStateChanged(ProgressBarState.Normal);
+                    PageHeadingChange("Downloading Kiseki...");
+                    ProgressBarStateChanged(ProgressBarState.Normal);
                     marquee = false;
                 }
 
-                OnProgressBarChange(progressValue);
+                ProgressBarChange(progressValue);
             }
 
             static async IAsyncEnumerable<int> StreamBackgroundOperationProgressAsync()
@@ -70,17 +70,17 @@ namespace Kiseki.Launcher
                 }
             }
 
-            OnPageHeadingChange("Installing Kiseki...");
-            OnProgressBarStateChanged(ProgressBarState.Marquee);
+            PageHeadingChange("Installing Kiseki...");
+            ProgressBarStateChanged(ProgressBarState.Marquee);
 
             await Task.Delay(2200);
-            OnPageHeadingChange("Configuring Kiseki...");
+            PageHeadingChange("Configuring Kiseki...");
 
             await Task.Delay(1200);
-            OnPageHeadingChange("Launching Kiseki...");
+            PageHeadingChange("Launching Kiseki...");
 
             await Task.Delay(3000);
-            OnLaunched();
+            Launched();
         }
 
         public async void Dispose()
@@ -88,24 +88,24 @@ namespace Kiseki.Launcher
             // TODO: This will only be called when the user closes the window OR we're done (i.e. the Launched event is called.)
         }
 
-        protected virtual void OnPageHeadingChange(string Heading)
+        protected virtual void PageHeadingChange(string Heading)
         {
-            PageHeadingChanged!.Invoke(this, Heading);
+            OnPageHeadingChanged!.Invoke(this, Heading);
         }
 
-        protected virtual void OnProgressBarChange(int Value)
+        protected virtual void ProgressBarChange(int Value)
         {
-            ProgressBarChanged!.Invoke(this, Value);
+            OnProgressBarChanged!.Invoke(this, Value);
         }
 
-        protected virtual void OnProgressBarStateChanged(ProgressBarState State)
+        protected virtual void ProgressBarStateChanged(ProgressBarState State)
         {
-            ProgressBarStateChanged!.Invoke(this, State);
+            OnProgressBarStateChanged!.Invoke(this, State);
         }
 
-        protected virtual void OnLaunched()
+        protected virtual void Launched()
         {
-            Launched!.Invoke(this, EventArgs.Empty);
+            OnLaunched!.Invoke(this, EventArgs.Empty);
         }
     }
 }

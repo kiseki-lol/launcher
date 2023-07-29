@@ -27,10 +27,10 @@ namespace Kiseki.Launcher.Windows
             };
 
             Controller = new Controller(Launcher.BaseUrl, args);
-            Controller.PageHeadingChanged += Controller_PageHeadingChanged;
-            Controller.ProgressBarChanged += Controller_ProgressBarChanged;
-            Controller.ProgressBarStateChanged += Controller_ProgressBarStateChanged;
-            Controller.Launched += Controller_Launched;
+            Controller.OnPageHeadingChanged += Controller_PageHeadingChanged;
+            Controller.OnProgressBarChanged += Controller_ProgressBarChanged;
+            Controller.OnProgressBarStateChanged += Controller_ProgressBarStateChanged;
+            Controller.OnLaunched += Controller_Launched;
             
             Page.Destroyed += (s, e) =>
             {
