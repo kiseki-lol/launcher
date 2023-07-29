@@ -9,7 +9,8 @@ namespace Kiseki.Launcher
     public class Controller
     {
         private readonly string BaseURL;
-        private readonly string[] Arguments;
+        private readonly string JoinScriptURL;
+        private readonly string Ticket;
 
         public event EventHandler<string>? PageHeadingChanged;
         public event EventHandler<int>? ProgressBarChanged;
@@ -19,7 +20,26 @@ namespace Kiseki.Launcher
         public Controller(string BaseURL, string[] Arguments)
         {
             this.BaseURL = BaseURL;
-            this.Arguments = Arguments;
+
+            // TODO: handle these more gracefully
+            if (Arguments.Length != 0 || Arguments[0] != "launch")
+            {
+                Environment.Exit(0);
+            }
+
+            if (!Helpers.IsBase64String(Arguments[0]))
+            {
+                Environment.Exit(0);
+            }
+
+            string payload = Helpers.ConvertBase64ToString(Arguments[0]);
+            if (payload.Split("|").Length != 2) // joinscripturl, ticket; TODO: this will also include launchmode (ide/play)
+            {
+                Environment.Exit(0);
+            }
+
+            JoinScriptURL = payload.Split("|")[0];
+            Ticket = payload.Split("|")[1];
         }
         
         public async void Start()
