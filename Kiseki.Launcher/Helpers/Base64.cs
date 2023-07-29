@@ -1,8 +1,8 @@
 using System.Text;
 
-namespace Kiseki.Launcher
+namespace Kiseki.Launcher.Helpers
 {
-    public static class Helpers
+    public static class Base64
     {
         // https://stackoverflow.com/a/54143400
         public static bool IsBase64String(string base64)

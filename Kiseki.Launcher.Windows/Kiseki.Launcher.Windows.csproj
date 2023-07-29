@@ -43,6 +43,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Kiseki.Launcher\*.cs" />
+    <Compile Include="..\Kiseki.Launcher\**\*.cs" />
   </ItemGroup>
 </Project>
