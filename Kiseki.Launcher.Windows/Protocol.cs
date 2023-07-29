@@ -4,6 +4,8 @@ namespace Kiseki.Launcher.Windows
 {
     public class Protocol : IProtocol
     {
+        public const string ProtocolKey = "kiseki";
+
         public void Register(string key, string name, string handler)
         {
             string arguments = $"\"{handler}\" \"%1\"";
@@ -30,17 +32,7 @@ namespace Kiseki.Launcher.Windows
 
         public void Unregister(string key)
         {
-            try
-            {
-                Registry.CurrentUser.DeleteSubKeyTree(@$"Software\Classes\{key}");
-            }
-            catch (Exception)
-            {
-                // Key doesn't exist (and why are we here?)
-#if DEBUG
-                throw;
-#endif
-            }
+            Registry.CurrentUser.DeleteSubKeyTree(@$"Software\Classes\{key}");
         }
     }
 }

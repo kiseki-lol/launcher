@@ -4,7 +4,6 @@ namespace Kiseki.Launcher
     {
         void Register();
         void Unregister();
-        void CreateShortcuts();
     }
     
     interface IProtocol

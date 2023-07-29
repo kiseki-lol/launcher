@@ -15,7 +15,7 @@ namespace Kiseki.Launcher.Windows
 
             Page = new TaskDialogPage()
             {
-                Caption = "Kiseki",
+                Caption = Launcher.ProjectName,
                 AllowMinimize = true,
             
                 ProgressBar = new TaskDialogProgressBar()
@@ -26,7 +26,7 @@ namespace Kiseki.Launcher.Windows
                 Buttons = { CloseButton }
             };
 
-            Controller = new Controller("test.kiseki.lol", args);
+            Controller = new Controller(Launcher.BaseUrl, args);
             Controller.PageHeadingChanged += Controller_PageHeadingChanged;
             Controller.ProgressBarChanged += Controller_ProgressBarChanged;
             Controller.ProgressBarStateChanged += Controller_ProgressBarStateChanged;
