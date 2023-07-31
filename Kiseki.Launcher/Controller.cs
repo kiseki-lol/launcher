@@ -41,14 +41,6 @@ namespace Kiseki.Launcher
         public async void Start()
         {
             PageHeadingChange("Connecting to Kiseki...");
-            
-            // This is kind of useless, but whatever
-            int response = await Web.CheckHealth();
-            if (response != Web.RESPONSE_SUCCESS)
-            {
-                ErrorShow($"Failed to connect to {Constants.ProjectName}.", "Please check your internet connection.");
-                return;
-            }
 
             bool marquee = true;
             await foreach (int progressValue in StreamBackgroundOperationProgressAsync())
