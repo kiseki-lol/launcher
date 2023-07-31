@@ -19,6 +19,8 @@ namespace Kiseki.Launcher
         public static void Initialize() => CurrentUrl = BaseUrl;
         public static string Url(string path) => $"https://{CurrentUrl}{path}";
 
+        private static bool MaintenanceMode = false;
+
         public static int CheckHealth()
         {
             var response = Helpers.Http.GetJson<Models.HealthCheck>(Url("/api/health"));
@@ -28,7 +30,11 @@ namespace Kiseki.Launcher
 
         public static bool LoadLicense(string license)
         {
-            CurrentUrl = $"{MaintenanceDomain}.{CurrentUrl}";
+            if (!MaintenanceMode)
+            {
+                CurrentUrl = $"{MaintenanceDomain}.{CurrentUrl}";
+                MaintenanceMode = true;
+            }
 
             // the "license" is actually just headers required to access the website.
             // this can be cloudflare zero-trust headers (like what Kiseki does), or however
@@ -36,6 +42,8 @@ namespace Kiseki.Launcher
 
             try
             {
+                HttpClient.DefaultRequestHeaders.Clear();
+                
                 var headers = JsonSerializer.Deserialize<Dictionary<string, string>>(license)!;
                 for (int i = 0; i < headers.Count; i++)
                 {
