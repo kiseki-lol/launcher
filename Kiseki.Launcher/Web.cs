@@ -16,9 +16,9 @@ namespace Kiseki.Launcher
         public static void Initialize() => CurrentUrl = BaseUrl;
         public static string Url(string path) => $"https://{CurrentUrl}{path}";
 
-        public static async Task<int> CheckHealth()
+        public static int CheckHealth()
         {
-            var response = await Helpers.Http.GetJson<Models.HealthCheck>(Url("/api/health"));
+            var response = Helpers.Http.GetJson<Models.HealthCheck>(Url("/api/health"));
             
             return response is null ? RESPONSE_FAILURE : response.Status;
         }

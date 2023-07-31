@@ -8,11 +8,11 @@ namespace Kiseki.Launcher.Windows
     {
         public readonly static string Version = Assembly.GetExecutingAssembly().GetName().Version!.ToString()[..^2];
         
-        public async static void Install()
+        public static void Install()
         {
             Directory.CreateDirectory(Directories.Base);
-            int response = await Web.CheckHealth();
-
+            int response = Web.CheckHealth();
+            
             if (response != Web.RESPONSE_SUCCESS)
             {
                 if (response != Web.RESPONSE_MAINTENANCE)
