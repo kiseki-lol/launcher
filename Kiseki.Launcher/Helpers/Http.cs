@@ -4,7 +4,7 @@ namespace Kiseki.Launcher.Helpers
 {
     public static class Http
     {
-        public static T GetJson<T>(string url)
+        public static T? GetJson<T>(string url)
         {
             try
             {
