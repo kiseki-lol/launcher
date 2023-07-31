@@ -5,21 +5,19 @@ namespace Kiseki.Launcher
 {
     public static class Web
     {
-        public const int RESPONSE_SUCCESS = 0;
         public const int RESPONSE_FAILURE = -1;
-
+        public const int RESPONSE_SUCCESS = 0;
         public const int RESPONSE_MAINTENANCE = 1;
         
-        public const string BaseUrl = "kiseki.lol";
-        public const string MaintenanceDomain = "test";
+        public const string BASE_URL = "kiseki.lol";
+        public const string MAINTENANCE_DOMAIN = "test";
         
         public static readonly HttpClient HttpClient = new();
         public static string CurrentUrl { get; private set; } = "";
+        public static bool MaintenanceMode { get; private set; } = false;
 
-        public static void Initialize() => CurrentUrl = BaseUrl;
+        public static void Initialize() => CurrentUrl = BASE_URL;
         public static string Url(string path) => $"https://{CurrentUrl}{path}";
-
-        private static bool MaintenanceMode = false;
 
         public static int CheckHealth()
         {
@@ -32,7 +30,7 @@ namespace Kiseki.Launcher
         {
             if (!MaintenanceMode)
             {
-                CurrentUrl = $"{MaintenanceDomain}.{CurrentUrl}";
+                CurrentUrl = $"{MAINTENANCE_DOMAIN}.{CurrentUrl}";
                 MaintenanceMode = true;
             }
 

@@ -4,7 +4,7 @@ namespace Kiseki.Launcher.Windows
 {
     public class Protocol : IProtocol
     {
-        public const string ProtocolKey = "kiseki";
+        public const string PROTOCOL_KEY = "kiseki";
 
         public void Register(string key, string name, string handler)
         {

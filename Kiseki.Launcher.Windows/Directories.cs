@@ -18,7 +18,7 @@ namespace Kiseki.Launcher.Windows
             Versions = Path.Combine(Base, "Versions");
 
             License = Path.Combine(Base, "license.bin");
-            Application = Path.Combine(Base, $"{Constants.ProjectName}.Launcher.exe");
+            Application = Path.Combine(Base, $"{Constants.PROJECT_NAME}.Launcher.exe");
         }
     }
 }

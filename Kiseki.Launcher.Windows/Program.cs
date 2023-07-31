@@ -8,7 +8,7 @@ namespace Kiseki.Launcher.Windows
         static void Main(string[] args)
         {
             string parentFolder = Path.GetDirectoryName(AppContext.BaseDirectory)!;
-            if (parentFolder.ToLower().Contains(Constants.ProjectName))
+            if (parentFolder.ToLower().Contains(Constants.PROJECT_NAME))
             {
                 // Set to the current directory (either user-installed or default; it has "Kiseki" in the path, so that's good enough for us)
                 Directories.Initialize(AppContext.BaseDirectory);
@@ -16,7 +16,7 @@ namespace Kiseki.Launcher.Windows
             else
             {
                 // Set to the default directory (user likely hasn't installed the launcher yet)
-                Directories.Initialize(Path.Combine(Directories.LocalAppData, Constants.ProjectName));
+                Directories.Initialize(Path.Combine(Directories.LocalAppData, Constants.PROJECT_NAME));
             }
 
             Web.Initialize();

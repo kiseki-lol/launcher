@@ -22,7 +22,7 @@ namespace Kiseki.Launcher
         {
             if (!Base64.IsBase64String(payload))
             {
-                ErrorShow($"Failed to launch {Constants.ProjectName}", $"Try launching {Constants.ProjectName} from the website again.");
+                ErrorShow($"Failed to launch {Constants.PROJECT_NAME}", $"Try launching {Constants.PROJECT_NAME} from the website again.");
                 return;
             }
 
@@ -30,7 +30,7 @@ namespace Kiseki.Launcher
             payload = Base64.ConvertBase64ToString(payload);
             if (payload.Split("|").Length != 2)
             {
-                ErrorShow($"Failed to launch {Constants.ProjectName}", $"Try launching {Constants.ProjectName} from the website again.");
+                ErrorShow($"Failed to launch {Constants.PROJECT_NAME}", $"Try launching {Constants.PROJECT_NAME} from the website again.");
                 return;
             }
 

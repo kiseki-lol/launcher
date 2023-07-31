@@ -21,7 +21,7 @@ namespace Kiseki.Launcher.Windows
             CloseButton = TaskDialogButton.Close;
             Page = new TaskDialogPage()
             {
-                Caption = Constants.ProjectName,
+                Caption = Constants.PROJECT_NAME,
                 AllowMinimize = true,
             
                 ProgressBar = new TaskDialogProgressBar()
