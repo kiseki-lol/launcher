@@ -32,18 +32,11 @@ namespace Kiseki.Launcher
 
             // the "license" is actually just headers required to access the website.
             // this can be cloudflare zero-trust headers (like what Kiseki does), or however
-            // else you'd like to do auth-walls. either way; it's just a JSON document that
-            // has each byte XORed by 55 (for some basic obfuscation).
+            // else you'd like to do auth-walls. either way; it's just a JSON document 
 
             try
             {
-                string json = "";
-                for (int i = 0; i < license.Length; i++)
-                {
-                    json += (char)(license[i] ^ 55);
-                }
-
-                var headers = JsonSerializer.Deserialize<Dictionary<string, string>>(json)!;
+                var headers = JsonSerializer.Deserialize<Dictionary<string, string>>(license)!;
                 for (int i = 0; i < headers.Count; i++)
                 {
                     HttpClient.DefaultRequestHeaders.Add(headers.ElementAt(i).Key, headers.ElementAt(i).Value);
