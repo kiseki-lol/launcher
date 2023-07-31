@@ -23,19 +23,21 @@ namespace Kiseki.Launcher.Windows
 
             if (!File.Exists(Directories.Application))
             {
-                // The launcher is not installed, so let's install it.
+                // The launcher is not installed, so let's run the install process - this will also exit the application
                 Launcher.Install();
             }
-
-            if (args.Length == 0)
+            else
             {
-                // Nothing for us to do :P
-                Process.Start(Web.Url("/games"));
-                Environment.Exit(0);
-            }
+                if (args.Length == 0)
+                {
+                    // Nothing for us to do :P
+                    Process.Start(Web.Url("/games"));
+                    Environment.Exit(0);
+                }
 
-            ApplicationConfiguration.Initialize();
-            Application.Run(new MainWindow(args[0]));
+                ApplicationConfiguration.Initialize();
+                Application.Run(new MainWindow(args[0]));
+            }
         }
     }
 }
