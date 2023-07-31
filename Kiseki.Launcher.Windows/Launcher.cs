@@ -36,6 +36,7 @@ namespace Kiseki.Launcher.Windows
                     {
                         // ... and if it's invalid, keep asking for a new one.
                         File.Delete(Directories.License);
+                        MessageBox.Show($"Corrupt license file! Please verify the contents of your license file (it should be named \"license.bin\".)", Constants.ProjectName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                         AskForLicense(Directories.License, false);
                     }
                     
