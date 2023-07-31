@@ -13,12 +13,11 @@ namespace Kiseki.Launcher.Windows
             Directory.CreateDirectory(Directories.Base);
             int response = await Web.CheckHealth();
 
-            if (response != Web.RESPONSE_SUCCESS || response != Web.RESPONSE_MAINTENANCE)
+            if (response != Web.RESPONSE_SUCCESS)
             {
                 if (response != Web.RESPONSE_MAINTENANCE)
                 {
                     // The Kiseki website is either down or we can't connect to the internet.
-                    // TODO: This is a strange scenario where we need to display an error outside of the controller. Can we do this within the page instead of a message box?
                     MessageBox.Show($"Failed to connect to the {Constants.ProjectName} website. Please check your internet connection.", Constants.ProjectName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     Environment.Exit(0);
                 }
