@@ -2,8 +2,6 @@ using System.Reflection;
 
 using Microsoft.Win32;
 
-using Syroot.Windows.IO;
-
 namespace Kiseki.Launcher.Windows
 {
     public class Launcher : ILauncher
@@ -58,7 +56,7 @@ namespace Kiseki.Launcher.Windows
                 {
                     Title = "Select your license file",
                     Filter = "License files (*.bin)|*.bin",
-                    InitialDirectory = KnownFolders.Downloads.Path
+                    InitialDirectory = Win32.GetDownloadsPath()
                 };
 
                 if (dialog.ShowDialog() == DialogResult.OK)
