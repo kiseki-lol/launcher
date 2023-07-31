@@ -6,7 +6,7 @@ namespace Kiseki.Launcher.Helpers
     {
         public static async Task<T?> GetJson<T>(string url)
         {
-            string json = await Controller.HttpClient.GetStringAsync(url);
+            string json = await Web.HttpClient.GetStringAsync(url);
 
             try
             {

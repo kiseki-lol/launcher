@@ -2,6 +2,6 @@ namespace Kiseki.Launcher.Models
 {
     public class Health
     {
-        public string Response { get; set; } = "";
+        public int Response { get; set; } = -1;
     }
 }

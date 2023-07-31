@@ -7,6 +7,7 @@ namespace Kiseki.Launcher.Windows
         public static string Base { get; private set; } = "";
         public static string Logs { get; private set; } = "";
         public static string Versions { get; private set; } = "";
+        public static string License { get; private set; } = "";
         public static string Application { get; private set; } = "";
 
         public static void Initialize(string baseDirectory)
@@ -15,8 +16,9 @@ namespace Kiseki.Launcher.Windows
 
             Logs = Path.Combine(Base, "Logs");
             Versions = Path.Combine(Base, "Versions");
-            
-            Application = Path.Combine(Base, $"{Launcher.ProjectName}.exe");
+
+            License = Path.Combine(Base, "license.bin");
+            Application = Path.Combine(Base, $"{Constants.ProjectName}.Launcher.exe");
         }
     }
 }

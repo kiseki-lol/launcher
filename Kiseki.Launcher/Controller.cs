@@ -10,54 +10,43 @@ namespace Kiseki.Launcher
 
     public class Controller
     {
-        private readonly string BaseURL;
         private readonly Dictionary<string, string> Arguments = new();
 
         public event EventHandler<string>? OnPageHeadingChange;
-        public event EventHandler<int>? OnProgressBarChange;
+        public event EventHandler<int>? OnProgressBarAdd;
         public event EventHandler<ProgressBarState>? OnProgressBarStateChange;
-        public event EventHandler? OnInstall;
+        public event EventHandler<string[]>? OnErrorShow;
         public event EventHandler? OnLaunch;
 
-        public static readonly HttpClient HttpClient = new();
-
-        public Controller(string baseURL, string[] args)
+        public Controller(string payload)
         {
-            BaseURL = baseURL;
-
-            if (args.Length == 0)
+            if (!Base64.IsBase64String(payload))
             {
-                // We are launching for the first time. This means that we should trigger the launcher install process.
-                Install();
+                ErrorShow($"Failed to launch {Constants.ProjectName}", $"Try launching {Constants.ProjectName} from the website again.");
+                return;
             }
-            else
+
+            // TODO: The payload will soon include more members; update this accordingly
+            payload = Base64.ConvertBase64ToString(payload);
+            if (payload.Split("|").Length != 2)
             {
-                // TODO: handle these more gracefully
-                if (!Base64.IsBase64String(args[0]))
-                {
-                    Environment.Exit(0);
-                }
-
-                // TODO: the payload will soon include more members, such as whether to open the IDE or not (as well as values required for our weird loopback authentication thing)
-                string payload = Base64.ConvertBase64ToString(args[0]);
-                if (payload.Split("|").Length != 2)
-                {
-                    Environment.Exit(0);
-                }
-
-                Arguments["JoinScriptURL"] = payload.Split("|")[0];
-                Arguments["Ticket"] = payload.Split("|")[1];
+                ErrorShow($"Failed to launch {Constants.ProjectName}", $"Try launching {Constants.ProjectName} from the website again.");
+                return;
             }
+
+            Arguments["JoinScriptURL"] = payload.Split("|")[0];
+            Arguments["Ticket"] = payload.Split("|")[1];
         }
         
         public async void Start()
         {
             PageHeadingChange("Connecting to Kiseki...");
             
-            var response = await Http.GetJson<Models.Health>($"https://{BaseURL}/api/health");
-            if (response is null)
+            // This is kind of useless, but whatever
+            int response = await Web.CheckHealth();
+            if (response != Web.RESPONSE_SUCCESS)
             {
-                PageHeadingChange("Failed to connect");
+                ErrorShow($"Failed to connect to {Constants.ProjectName}.", "Please check your internet connection.");
                 return;
             }
 
@@ -71,18 +60,15 @@ namespace Kiseki.Launcher
                     marquee = false;
                 }
 
-                ProgressBarChange(progressValue);
+                ProgressBarAdd(progressValue);
             }
 
             static async IAsyncEnumerable<int> StreamBackgroundOperationProgressAsync()
             {
                 await Task.Delay(2800);
 
-                for (int i = 0; i <= 100; i += 4)
-                {
-                    yield return i;
-                    await Task.Delay(200);
-                }
+                yield return 4;
+                await Task.Delay(200);
             }
 
             PageHeadingChange("Installing Kiseki...");
@@ -103,26 +89,26 @@ namespace Kiseki.Launcher
             // TODO: This will only be called when the user closes the window OR we're done (i.e. the Launched event is called.)
         }
 
-        protected virtual void PageHeadingChange(string Heading)
+        protected virtual void PageHeadingChange(string heading)
         {
-            OnPageHeadingChange!.Invoke(this, Heading);
+            OnPageHeadingChange!.Invoke(this, heading);
         }
 
-        protected virtual void ProgressBarChange(int Value)
+        protected virtual void ProgressBarAdd(int value)
         {
-            OnProgressBarChange!.Invoke(this, Value);
+            OnProgressBarAdd!.Invoke(this, value);
         }
 
-        protected virtual void ProgressBarStateChange(ProgressBarState State)
+        protected virtual void ProgressBarStateChange(ProgressBarState state)
         {
-            OnProgressBarStateChange!.Invoke(this, State);
+            OnProgressBarStateChange!.Invoke(this, state);
         }
 
-        protected virtual void Install()
+        protected virtual void ErrorShow(string heading, string text)
         {
-            OnInstall!.Invoke(this, EventArgs.Empty);
+            // ugly hack for now (I don't want to derive EventHandler just for this)
+            OnErrorShow!.Invoke(this, new string[] { heading, text });
         }
-
 
         protected virtual void Launch()
         {

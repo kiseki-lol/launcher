@@ -9,13 +9,19 @@ namespace Kiseki.Launcher.Windows
         private readonly TaskDialogPage Page;
         private readonly Controller Controller;
 
-        public MainWindow(string[] args)
+        public MainWindow(string payload)
         {
-            CloseButton = TaskDialogButton.Close;
+            Controller = new Controller(payload);
+            Controller.OnPageHeadingChange += Controller_PageHeadingChanged;
+            Controller.OnProgressBarAdd += Controller_ProgressBarAdded;
+            Controller.OnProgressBarStateChange += Controller_ProgressBarStateChanged;
+            Controller.OnErrorShow += Controller_ErrorShown;
+            Controller.OnLaunch += (s, e) => Environment.Exit(0);
 
+            CloseButton = TaskDialogButton.Close;
             Page = new TaskDialogPage()
             {
-                Caption = Launcher.ProjectName,
+                Caption = Constants.ProjectName,
                 AllowMinimize = true,
             
                 ProgressBar = new TaskDialogProgressBar()
@@ -26,13 +32,10 @@ namespace Kiseki.Launcher.Windows
                 Buttons = { CloseButton }
             };
 
-            Controller = new Controller(Launcher.BaseUrl, args);
-            Controller.OnPageHeadingChange += Controller_PageHeadingChanged;
-            Controller.OnProgressBarChange += Controller_ProgressBarChanged;
-            Controller.OnProgressBarStateChange += Controller_ProgressBarStateChanged;
-
-            Controller.OnInstall += (s, e) => Launcher.Install();
-            Controller.OnLaunch += (s, e) => Environment.Exit(0);
+            Page.Created += (s, e) =>
+            {
+                Controller.Start();
+            };
             
             Page.Destroyed += (s, e) =>
             {
@@ -45,22 +48,23 @@ namespace Kiseki.Launcher.Windows
 
         private void CloseButton_Click(object? sender, EventArgs e)
         {
-            throw new NotImplementedException();
+            Controller.Dispose();
+            Environment.Exit(0);
         }
 
-        private void Controller_PageHeadingChanged(object? sender, string Heading)
+        private void Controller_PageHeadingChanged(object? sender, string heading)
         {
-            Page.Heading = Heading;
+            Page.Heading = heading;
         }
 
-        private void Controller_ProgressBarChanged(object? sender, int Value)
+        private void Controller_ProgressBarAdded(object? sender, int value)
         {
-            Page.ProgressBar!.Value = Value;
+            Page.ProgressBar!.Value += value;
         }
 
-        private void Controller_ProgressBarStateChanged(object? sender, ProgressBarState State)
+        private void Controller_ProgressBarStateChanged(object? sender, ProgressBarState state)
         {
-            Page.ProgressBar!.State = State switch
+            Page.ProgressBar!.State = state switch
             {
                 ProgressBarState.Normal => TaskDialogProgressBarState.Normal,
                 ProgressBarState.Marquee => TaskDialogProgressBarState.Marquee,
@@ -68,15 +72,19 @@ namespace Kiseki.Launcher.Windows
             };
         }
 
+        private void Controller_ErrorShown(object? sender, string[] texts)
+        {
+            Page.Icon = TaskDialogIcon.Error;
+            Page.Heading = texts[0];
+            Page.Text = texts[1];
+
+            Controller.Dispose();
+        }
+
         private void ShowProgressDialog()
         {
             TaskDialogIcon logo = new(Resources.IconKiseki);
             Page.Icon = logo;
-
-            Page.Created += (s, e) =>
-            {
-                Controller.Start();
-            };
 
             TaskDialog.ShowDialog(Page);
         }
