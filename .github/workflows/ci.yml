@@ -8,11 +8,14 @@ jobs:
     if: startsWith(github.ref, 'refs/tag/v')
 
     steps:
-    - name: Download release artifacts
+    - name: Download release artifact
       uses: actions/download-artifact@v3
+      with:
+        name: Kiseki.Launcher.Windows (Release)
+        path: win-x64
     
-    - name: Rename artifacts
-      run: mv Kiseki.Launcher.exe Kiseki.Launcher-v${{ github.ref_name }}_win-x64.exe
+    - name: Rename binary
+      run: mv win-x64/Kiseki.Launcher.Windows.exe Kiseki.Launcher-v${{ github.ref_name }}_win-x64.exe
     
     - name: Create release draft
       uses: softprops/action-gh-release@v1
