@@ -2,7 +2,8 @@ namespace Kiseki.Launcher
 {
     public interface ILauncher
     {
-        void Register();
-        void Unregister();
+        static abstract void Install();
+        static abstract void Register();
+        static abstract void Unregister();
     }
 }

@@ -13,10 +13,11 @@ namespace Kiseki.Launcher
         private readonly string BaseURL;
         private readonly Dictionary<string, string> Arguments = new();
 
-        public event EventHandler<string>? OnPageHeadingChanged;
-        public event EventHandler<int>? OnProgressBarChanged;
-        public event EventHandler<ProgressBarState>? OnProgressBarStateChanged;
-        public event EventHandler? OnLaunched;
+        public event EventHandler<string>? OnPageHeadingChange;
+        public event EventHandler<int>? OnProgressBarChange;
+        public event EventHandler<ProgressBarState>? OnProgressBarStateChange;
+        public event EventHandler? OnInstall;
+        public event EventHandler? OnLaunch;
 
         public static readonly HttpClient HttpClient = new();
 
@@ -24,7 +25,12 @@ namespace Kiseki.Launcher
         {
             BaseURL = baseURL;
 
-            if (args.Length > 0)
+            if (args.Length == 0)
+            {
+                // We are launching for the first time. This means that we should trigger the launcher install process.
+                Install();
+            }
+            else
             {
                 // TODO: handle these more gracefully
                 if (!Base64.IsBase64String(args[0]))
@@ -61,7 +67,7 @@ namespace Kiseki.Launcher
                 if (marquee)
                 {
                     PageHeadingChange("Downloading Kiseki...");
-                    ProgressBarStateChanged(ProgressBarState.Normal);
+                    ProgressBarStateChange(ProgressBarState.Normal);
                     marquee = false;
                 }
 
@@ -80,7 +86,7 @@ namespace Kiseki.Launcher
             }
 
             PageHeadingChange("Installing Kiseki...");
-            ProgressBarStateChanged(ProgressBarState.Marquee);
+            ProgressBarStateChange(ProgressBarState.Marquee);
 
             await Task.Delay(2200);
             PageHeadingChange("Configuring Kiseki...");
@@ -89,7 +95,7 @@ namespace Kiseki.Launcher
             PageHeadingChange("Launching Kiseki...");
 
             await Task.Delay(3000);
-            Launched();
+            Launch();
         }
 
         public async void Dispose()
@@ -99,22 +105,28 @@ namespace Kiseki.Launcher
 
         protected virtual void PageHeadingChange(string Heading)
         {
-            OnPageHeadingChanged!.Invoke(this, Heading);
+            OnPageHeadingChange!.Invoke(this, Heading);
         }
 
         protected virtual void ProgressBarChange(int Value)
         {
-            OnProgressBarChanged!.Invoke(this, Value);
+            OnProgressBarChange!.Invoke(this, Value);
         }
 
-        protected virtual void ProgressBarStateChanged(ProgressBarState State)
+        protected virtual void ProgressBarStateChange(ProgressBarState State)
         {
-            OnProgressBarStateChanged!.Invoke(this, State);
+            OnProgressBarStateChange!.Invoke(this, State);
         }
 
-        protected virtual void Launched()
+        protected virtual void Install()
         {
-            OnLaunched!.Invoke(this, EventArgs.Empty);
+            OnInstall!.Invoke(this, EventArgs.Empty);
+        }
+
+
+        protected virtual void Launch()
+        {
+            OnLaunch!.Invoke(this, EventArgs.Empty);
         }
     }
 }

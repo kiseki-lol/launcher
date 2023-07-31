@@ -27,10 +27,12 @@ namespace Kiseki.Launcher.Windows
             };
 
             Controller = new Controller(Launcher.BaseUrl, args);
-            Controller.OnPageHeadingChanged += Controller_PageHeadingChanged;
-            Controller.OnProgressBarChanged += Controller_ProgressBarChanged;
-            Controller.OnProgressBarStateChanged += Controller_ProgressBarStateChanged;
-            Controller.OnLaunched += Controller_Launched;
+            Controller.OnPageHeadingChange += Controller_PageHeadingChanged;
+            Controller.OnProgressBarChange += Controller_ProgressBarChanged;
+            Controller.OnProgressBarStateChange += Controller_ProgressBarStateChanged;
+
+            Controller.OnInstall += (s, e) => Launcher.Install();
+            Controller.OnLaunch += (s, e) => Environment.Exit(0);
             
             Page.Destroyed += (s, e) =>
             {
@@ -64,11 +66,6 @@ namespace Kiseki.Launcher.Windows
                 ProgressBarState.Marquee => TaskDialogProgressBarState.Marquee,
                 _ => throw new NotImplementedException()
             };
-        }
-
-        private void Controller_Launched(object? sender, EventArgs e)
-        {
-            Environment.Exit(0);
         }
 
         private void ShowProgressDialog()

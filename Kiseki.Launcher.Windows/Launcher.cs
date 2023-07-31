@@ -12,7 +12,12 @@ namespace Kiseki.Launcher.Windows
         public readonly static string BaseUrl = "test.kiseki.lol"; // TODO: This should be set dynamically somehow
         public readonly static string Version = Assembly.GetExecutingAssembly().GetName().Version!.ToString()[..^2];
         
-        public void Register()
+        public static void Install()
+        {
+            
+        }
+
+        public static void Register()
         {
             using (RegistryKey applicationKey = Registry.CurrentUser.CreateSubKey($@"Software\{ProjectName}"))
             {
@@ -38,7 +43,7 @@ namespace Kiseki.Launcher.Windows
             uninstallKey.SetValue("URLUpdateInfo", $"https://github.com/{ProjectRepository}/releases/latest");
         }
 
-        public void Unregister()
+        public static void Unregister()
         {
             Registry.CurrentUser.DeleteSubKey($@"Software\{ProjectName}");
         }
