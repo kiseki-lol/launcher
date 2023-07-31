@@ -8,11 +8,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
     - uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 7.0
     
+    - name: Restore dependencies
+      run: dotnet restore
+    
     - name: Build
+      run: dotnet build --no-restore
+    
+    - name: Publish
       run: |
         dotnet publish -r win-x64 -c Release --no-self-contained -p:PublishDir=../publish/win-x64
         mv publish/win-x64/Kiseki.Launcher.Windows.exe publish/Kiseki.Launcher.exe
