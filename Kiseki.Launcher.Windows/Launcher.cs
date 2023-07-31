@@ -2,6 +2,8 @@ using System.Reflection;
 
 using Microsoft.Win32;
 
+using Syroot.Windows.IO;
+
 namespace Kiseki.Launcher.Windows
 {
     public class Launcher : ILauncher
@@ -24,10 +26,20 @@ namespace Kiseki.Launcher.Windows
                 else
                 {
                     // We are in maintenance mode, so let's ask for a license.
-                    AskForLicense(Directories.License);
-                    Web.LoadLicense(File.ReadAllText(Directories.License));
+                    if (!File.Exists(Directories.License))
+                    {
+                        AskForLicense(Directories.License);
+                    }
+
+                    // ... load the license ...
+                    while (!Web.LoadLicense(File.ReadAllText(Directories.License)))
+                    {
+                        // ... and if it's invalid, keep asking for a new one.
+                        File.Delete(Directories.License);
+                        AskForLicense(Directories.License, false);
+                    }
                     
-                    // ... try this again;
+                    // ... and then try this again;
                     Install();
                 }
             }
@@ -35,21 +47,27 @@ namespace Kiseki.Launcher.Windows
             // okay, now download the launcher from the Kiseki website...
         }
 
-        private static void AskForLicense(string licensePath)
+        private static void AskForLicense(string licensePath, bool showDialog = true)
         {
-            using OpenFileDialog dialog = new()
+            DialogResult answer = showDialog ? MessageBox.Show($"{Constants.ProjectName} is currently under maintenance and requires a license in order to access games. Would you like to look for the license file now?", Constants.ProjectName, MessageBoxButtons.YesNo, MessageBoxIcon.Warning) : DialogResult.Yes;
+            
+            if (answer == DialogResult.Yes)
             {
-                Title = "Select your license file",
-                Filter = "License files (*.bin)|*.bin",
-                InitialDirectory = Directories.Base
-            };
+                using OpenFileDialog dialog = new()
+                {
+                    Title = "Select your license file",
+                    Filter = "License files (*.bin)|*.bin",
+                    InitialDirectory = KnownFolders.Downloads.Path
+                };
 
-            if (dialog.ShowDialog() == DialogResult.OK)
-            {
-                File.Copy(dialog.FileName, licensePath, true);
+                if (dialog.ShowDialog() == DialogResult.OK)
+                {
+                    File.Copy(dialog.FileName, licensePath, true);
+                }
             }
         }
 
+        // TODO: Implement this
         public static void Register()
         {
             using (RegistryKey applicationKey = Registry.CurrentUser.CreateSubKey($@"Software\{Constants.ProjectName}"))
@@ -76,6 +94,7 @@ namespace Kiseki.Launcher.Windows
             uninstallKey.SetValue("URLUpdateInfo", $"https://github.com/{Constants.ProjectRepository}/releases/latest");
         }
 
+        // TODO: Implement this
         public static void Unregister()
         {
             Registry.CurrentUser.DeleteSubKey($@"Software\{Constants.ProjectName}");
