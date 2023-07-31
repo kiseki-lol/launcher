@@ -15,11 +15,9 @@ jobs:
     - name: Build
       run: |
         dotnet publish -r win-x64 -c Release --no-self-contained -p:PublishDir=../publish/win-x64
-        mv publish/win-x64/Kiseki.Launcher.Windows.exe publish/win-x64/Kiseki.Launcher.exe
-        mv publish/win-x64/Kiseki.Launcher.Windows.pdb publish/win-x64/Kiseki.Launcher.pdb
+        mv publish/win-x64/Kiseki.Launcher.Windows.exe publish/Kiseki.Launcher.exe
     
     - name: Upload
       uses: actions/upload-artifact@v3
       with:
-        name: win-x64
-        path: publish/win-x64/*
+        path: publish/Kiseki.Launcher.exe
