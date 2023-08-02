@@ -9,6 +9,7 @@ namespace Kiseki.Launcher.Helpers
             try
             {
                 string json = Web.HttpClient.GetStringAsync(url).Result;
+                
                 return JsonSerializer.Deserialize<T>(json);
             }
             catch

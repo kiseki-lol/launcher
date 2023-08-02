@@ -47,6 +47,12 @@ namespace Kiseki.Launcher.Windows
                     return;
                 }
 
+                if (args[0] == "uninstall")
+                {
+                    Launcher.Uninstall(args[0] == "-quiet");
+                    return;
+                }
+
                 ApplicationConfiguration.Initialize();
                 Application.Run(new MainWindow(args[0]));
             }

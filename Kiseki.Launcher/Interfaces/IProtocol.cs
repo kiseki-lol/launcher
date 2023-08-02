@@ -2,7 +2,7 @@ namespace Kiseki.Launcher
 {
     public interface IProtocol
     {
-        void Register(string key, string name, string handler);
-        void Unregister(string key);
+        static abstract void Register();
+        static abstract void Unregister();
     }
 }

@@ -49,6 +49,7 @@ namespace Kiseki.Launcher
                 {
                     PageHeadingChange("Downloading Kiseki...");
                     ProgressBarStateChange(ProgressBarState.Normal);
+
                     marquee = false;
                 }
 
@@ -60,6 +61,7 @@ namespace Kiseki.Launcher
                 await Task.Delay(2800);
 
                 yield return 4;
+                
                 await Task.Delay(200);
             }
 

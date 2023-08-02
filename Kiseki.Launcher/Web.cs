@@ -22,12 +22,11 @@ namespace Kiseki.Launcher
             CurrentUrl = IsInMaintenance ? $"{MAINTENANCE_DOMAIN}.{BASE_URL}" : BASE_URL;
 
             int response = CheckHealth();
+            
             if (response != RESPONSE_SUCCESS)
             {
                 if (response == RESPONSE_MAINTENANCE)
-                {
                     IsInMaintenance = true;
-                }
 
                 return false;
             }
@@ -55,10 +54,9 @@ namespace Kiseki.Launcher
                 HttpClient.DefaultRequestHeaders.Clear();
                 
                 var headers = JsonSerializer.Deserialize<Dictionary<string, string>>(license)!;
+                
                 for (int i = 0; i < headers.Count; i++)
-                {
                     HttpClient.DefaultRequestHeaders.Add(headers.ElementAt(i).Key, headers.ElementAt(i).Value);
-                }
             }
             catch
             {

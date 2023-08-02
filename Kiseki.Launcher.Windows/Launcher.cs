@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Reflection;
 
 using Microsoft.Win32;
@@ -15,14 +16,69 @@ namespace Kiseki.Launcher.Windows
             Directory.CreateDirectory(Directories.Base);
         }
 
-        // TODO: Implement this
-        public static void Register()
+        public static void Uninstall(bool quiet = false)
         {
-            using (RegistryKey applicationKey = Registry.CurrentUser.CreateSubKey($@"Software\{Constants.PROJECT_NAME}"))
+            DialogResult answer = quiet ? DialogResult.Yes : MessageBox.Show($"Are you sure you want to uninstall {Constants.PROJECT_NAME}?", Constants.PROJECT_NAME, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
+            if (answer != DialogResult.Yes)
+                Environment.Exit((int)Win32.ErrorCode.ERROR_CANCELLED);
+
+            // Close active processes
+            if (Process.GetProcessesByName($"{Constants.PROJECT_NAME}.Player").Any() || Process.GetProcessesByName($"{Constants.PROJECT_NAME}.Studio").Any())
             {
-                applicationKey.SetValue("InstallLocation", Directories.Base);
+                answer = quiet ? DialogResult.Yes : MessageBox.Show($"Kiseki is currently running. Would you like to close Kiseki now?", Constants.PROJECT_NAME, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
+                if (answer != DialogResult.Yes)
+                    Environment.Exit((int)Win32.ErrorCode.ERROR_CANCELLED);
+                
+                try
+                {
+                    foreach (Process process in Process.GetProcessesByName($"{Constants.PROJECT_NAME}.Player"))
+                        process.Kill();
+
+                    foreach (Process process in Process.GetProcessesByName($"{Constants.PROJECT_NAME}.Studio"))
+                        process.Kill();
+                }
+                catch
+                {
+                    Environment.Exit((int)Win32.ErrorCode.ERROR_INTERNAL_ERROR);
+                }
             }
 
+            // Delete all files
+            Directory.Delete(Directories.Logs, true);
+            Directory.Delete(Directories.Versions, true);
+            Directory.Delete(Directories.License);
+
+            // Cleanup our registry entries
+            Unregister();
+            Protocol.Unregister();
+
+            answer = quiet ? DialogResult.OK : MessageBox.Show($"Sucessfully uninstalled {Constants.PROJECT_NAME}!", Constants.PROJECT_NAME, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            if (answer == DialogResult.OK || answer == DialogResult.Cancel)
+            {
+                string command = $"del /Q \"{Directories.Application}\"";
+
+                if (Directory.GetFiles(Directories.Base, "*", SearchOption.AllDirectories).Length == 1)
+                {
+                    // We're the only file in the directory, so we can delete the entire directory
+                    command += $" && rmdir \"{Directories.Base}\"";
+                }
+                
+                Process.Start(new ProcessStartInfo()
+                {
+                    FileName = "cmd.exe",
+                    Arguments = $"/c timeout 5 && {command}",
+                    UseShellExecute = true,
+                    WindowStyle = ProcessWindowStyle.Hidden
+                });
+
+                Environment.Exit((int)Win32.ErrorCode.ERROR_SUCCESS);
+            }
+        }
+
+        public static void Register()
+        {
             using RegistryKey uninstallKey = Registry.CurrentUser.CreateSubKey($@"Software\Microsoft\Windows\CurrentVersion\Uninstall\{Constants.PROJECT_NAME}");
             
             uninstallKey.SetValue("DisplayIcon", $"{Directories.Application},0");
@@ -42,10 +98,18 @@ namespace Kiseki.Launcher.Windows
             uninstallKey.SetValue("URLUpdateInfo", $"https://github.com/{Constants.PROJECT_REPOSITORY}/releases/latest");
         }
 
-        // TODO: Implement this
         public static void Unregister()
         {
-            Registry.CurrentUser.DeleteSubKey($@"Software\{Constants.PROJECT_NAME}");
+            try
+            {
+                Registry.CurrentUser.DeleteSubKey($@"Software\Microsoft\Windows\CurrentVersion\Uninstall\{Constants.PROJECT_NAME}");
+            }
+            catch
+            {
+#if DEBUG
+                throw;
+#endif
+            }
         }
 
         #endregion
