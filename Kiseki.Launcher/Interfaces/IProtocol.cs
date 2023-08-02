@@ -1,6 +1,6 @@
 namespace Kiseki.Launcher.Interfaces;
 
-// This cl is responsible for handling registration of the Kiseki protcool handler
+// This is responsible for handling registration of the Kiseki protcool handler
 public interface IProtocol
 {
     static abstract void Register();
