@@ -21,8 +21,11 @@ namespace Kiseki.Launcher
         {
             CurrentUrl = IsInMaintenance ? $"{MAINTENANCE_DOMAIN}.{BASE_URL}" : BASE_URL;
 
-            int response = CheckHealth();
-            
+            Task<int> task = CheckHealth();
+            task.Wait();
+
+            int response = task.Result;
+
             if (response != RESPONSE_SUCCESS)
             {
                 if (response == RESPONSE_MAINTENANCE)
@@ -36,9 +39,9 @@ namespace Kiseki.Launcher
 
         public static string Url(string path) => $"https://{CurrentUrl}{path}";
 
-        public static int CheckHealth()
+        public static async Task<int> CheckHealth()
         {
-            var response = Helpers.Http.GetJson<Models.HealthCheck>(Url("/api/health"));
+            var response = await Helpers.Http.GetJson<Models.HealthCheck>(Url("/api/health"));
             
             return response is null ? RESPONSE_FAILURE : response.Status;
         }
@@ -54,7 +57,7 @@ namespace Kiseki.Launcher
                 HttpClient.DefaultRequestHeaders.Clear();
                 
                 var headers = JsonSerializer.Deserialize<Dictionary<string, string>>(license)!;
-                
+
                 for (int i = 0; i < headers.Count; i++)
                     HttpClient.DefaultRequestHeaders.Add(headers.ElementAt(i).Key, headers.ElementAt(i).Value);
             }
