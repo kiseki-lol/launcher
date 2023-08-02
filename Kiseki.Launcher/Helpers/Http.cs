@@ -1,21 +1,20 @@
+namespace Kiseki.Launcher.Helpers;
+
 using System.Text.Json;
 
-namespace Kiseki.Launcher.Helpers
+public static class Http
 {
-    public static class Http
+    public static async Task<T?> GetJson<T>(string url)
     {
-        public static async Task<T?> GetJson<T>(string url)
+        try
         {
-            try
-            {
-                string json = await Web.HttpClient.GetStringAsync(url);
+            string json = await Web.HttpClient.GetStringAsync(url);
 
-                return JsonSerializer.Deserialize<T>(json);
-            }
-            catch
-            {
-                return default;
-            }
+            return JsonSerializer.Deserialize<T>(json);
+        }
+        catch
+        {
+            return default;
         }
     }
 }

@@ -1,8 +1,7 @@
-namespace Kiseki.Launcher.Enums
+namespace Kiseki.Launcher.Enums;
+
+public enum ProgressBarState
 {
-    public enum ProgressBarState
-    {
-        Normal,
-        Marquee
-    }
+    Normal,
+    Marquee
 }

@@ -4,8 +4,8 @@ namespace Kiseki.Launcher.Windows
 {
     public static class Win32
     {
-        // https://learn.microsoft.com/en-us/windows/win32/msi/error-codes
-        // https://i-logic.com/serial/errorcodes.htm
+        // Ref: https://learn.microsoft.com/en-us/windows/win32/msi/error-codes
+        // Ref: https://i-logic.com/serial/errorcodes.htm
         public enum ErrorCode
         {
             ERROR_SUCCESS = 0,
@@ -15,7 +15,7 @@ namespace Kiseki.Launcher.Windows
             ERROR_INTERNAL_ERROR = 1359
         }
 
-        // https://www.codeproject.com/Articles/878605/Getting-All-Special-Folders-in-NET
+        // Source: https://www.codeproject.com/Articles/878605/Getting-All-Special-Folders-in-NET
         public static string GetDownloadsPath()
         {
             return SHGetKnownFolderPath(new("374DE290-123F-4565-9164-39C4925E467B"), 0);

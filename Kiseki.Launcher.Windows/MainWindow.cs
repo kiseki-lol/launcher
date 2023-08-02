@@ -1,83 +1,82 @@
 ﻿using Kiseki.Launcher.Windows.Properties;
 
-namespace Kiseki.Launcher.Windows
+namespace Kiseki.Launcher.Windows;
+
+[System.ComponentModel.DesignerCategory("")]
+public class MainWindow : Form
 {
-    [System.ComponentModel.DesignerCategory("")]
-    public class MainWindow : Form
+    private readonly TaskDialogButton CloseButton;
+    private readonly TaskDialogPage Page;
+    private readonly Bootstrapper Bootstrapper;
+
+    public MainWindow(string payload)
     {
-        private readonly TaskDialogButton CloseButton;
-        private readonly TaskDialogPage Page;
-        private readonly Bootstrapper Bootstrapper;
+        Bootstrapper = new Bootstrapper(payload);
+        Bootstrapper.OnHeadingChange += Bootstrapper_HeadingChanged;
+        Bootstrapper.OnProgressBarAdd += Bootstrapper_ProgressBarAdded;
+        Bootstrapper.OnProgressBarStateChange += Bootstrapper_ProgressBarStateChanged;
+        Bootstrapper.OnError += Bootstrapper_Errored;
 
-        public MainWindow(string payload)
+        CloseButton = TaskDialogButton.Close;
+        Page = new TaskDialogPage()
         {
-            Bootstrapper = new Bootstrapper(payload);
-            Bootstrapper.OnHeadingChange += Bootstrapper_HeadingChanged;
-            Bootstrapper.OnProgressBarAdd += Bootstrapper_ProgressBarAdded;
-            Bootstrapper.OnProgressBarStateChange += Bootstrapper_ProgressBarStateChanged;
-            Bootstrapper.OnError += Bootstrapper_Errored;
-
-            CloseButton = TaskDialogButton.Close;
-            Page = new TaskDialogPage()
+            Caption = Constants.PROJECT_NAME,
+            AllowMinimize = true,
+        
+            ProgressBar = new TaskDialogProgressBar()
             {
-                Caption = Constants.PROJECT_NAME,
-                AllowMinimize = true,
-            
-                ProgressBar = new TaskDialogProgressBar()
-                {
-                    State = TaskDialogProgressBarState.Marquee
-                },
+                State = TaskDialogProgressBarState.Marquee
+            },
 
-                Buttons = { CloseButton }
-            };
+            Buttons = { CloseButton }
+        };
 
-            Page.Created += (s, e) =>
-            {
-                Bootstrapper.Run();
-            };
-
-            ShowTaskDialog();
-        }
-
-        private void ShowTaskDialog()
+        Page.Created += (s, e) =>
         {
-            TaskDialogIcon logo = new(Resources.IconKiseki);
-            Page.Icon = logo;
+            Bootstrapper.Run();
+        };
 
-            TaskDialog.ShowDialog(Page);
-        }
+        ShowTaskDialog();
+    }
 
-        private void CloseButton_Click(object? sender, EventArgs e)
+    private void ShowTaskDialog()
+    {
+        TaskDialogIcon logo = new(Resources.IconKiseki);
+        Page.Icon = logo;
+
+        TaskDialog.ShowDialog(Page);
+    }
+
+    private void CloseButton_Click(object? sender, EventArgs e)
+    {
+        Bootstrapper.Abort();
+        Environment.Exit(0);
+    }
+
+    private void Bootstrapper_HeadingChanged(object? sender, string heading)
+    {
+        Page.Heading = heading;
+    }
+
+    private void Bootstrapper_ProgressBarAdded(object? sender, int value)
+    {
+        Page.ProgressBar!.Value += value;
+    }
+
+    private void Bootstrapper_ProgressBarStateChanged(object? sender, Enums.ProgressBarState state)
+    {
+        Page.ProgressBar!.State = state switch
         {
-            Bootstrapper.Abort();
-            Environment.Exit(0);
-        }
+            Enums.ProgressBarState.Normal => TaskDialogProgressBarState.Normal,
+            Enums.ProgressBarState.Marquee => TaskDialogProgressBarState.Marquee,
+            _ => throw new NotImplementedException()
+        };
+    }
 
-        private void Bootstrapper_HeadingChanged(object? sender, string heading)
-        {
-            Page.Heading = heading;
-        }
-
-        private void Bootstrapper_ProgressBarAdded(object? sender, int value)
-        {
-            Page.ProgressBar!.Value += value;
-        }
-
-        private void Bootstrapper_ProgressBarStateChanged(object? sender, Enums.ProgressBarState state)
-        {
-            Page.ProgressBar!.State = state switch
-            {
-                Enums.ProgressBarState.Normal => TaskDialogProgressBarState.Normal,
-                Enums.ProgressBarState.Marquee => TaskDialogProgressBarState.Marquee,
-                _ => throw new NotImplementedException()
-            };
-        }
-
-        private void Bootstrapper_Errored(object? sender, string[] texts)
-        {
-            Page.Icon = TaskDialogIcon.Error;
-            Page.Heading = texts[0];
-            Page.Text = texts[1];
-        }
+    private void Bootstrapper_Errored(object? sender, string[] texts)
+    {
+        Page.Icon = TaskDialogIcon.Error;
+        Page.Heading = texts[0];
+        Page.Text = texts[1];
     }
 }

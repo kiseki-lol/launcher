@@ -1,10 +1,9 @@
+namespace Kiseki.Launcher.Models;
+
 using System.Text.Json.Serialization;
 
-namespace Kiseki.Launcher.Models
+public class HealthCheck
 {
-    public class HealthCheck
-    {
-        [JsonPropertyName("status")]
-        public int Status { get; set; } = -1;
-    }
+    [JsonPropertyName("status")]
+    public int Status { get; set; } = -1;
 }

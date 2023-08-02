@@ -1,69 +1,68 @@
-using System.Net;
+namespace Kiseki.Launcher;
+
 using System.Text.Json;
 
-namespace Kiseki.Launcher
+public static class Web
 {
-    public static class Web
+    public const int RESPONSE_FAILURE = -1;
+    public const int RESPONSE_SUCCESS = 0;
+    public const int RESPONSE_MAINTENANCE = 1;
+
+    public static string CurrentUrl { get; private set; } = "";
+    public static bool IsInMaintenance { get; private set; } = false;
+
+    public static readonly HttpClient HttpClient = new();
+
+    public static bool Initialize()
     {
-        public const int RESPONSE_FAILURE = -1;
-        public const int RESPONSE_SUCCESS = 0;
-        public const int RESPONSE_MAINTENANCE = 1;
+        CurrentUrl = IsInMaintenance ? $"{Constants.MAINTENANCE_DOMAIN}.{Constants.BASE_URL}" : Constants.BASE_URL;
         
-        public static string CurrentUrl { get; private set; } = "";
-        public static bool IsInMaintenance { get; private set; } = false;
+        // Synchronous block is intentional
+        Task<int> task = CheckHealth();
+        task.Wait();
 
-        public static readonly HttpClient HttpClient = new();
+        int response = task.Result;
 
-        public static bool Initialize()
+        if (response != RESPONSE_SUCCESS)
         {
-            CurrentUrl = IsInMaintenance ? $"{Constants.MAINTENANCE_DOMAIN}.{Constants.BASE_URL}" : Constants.BASE_URL;
+            if (response == RESPONSE_MAINTENANCE)
+                IsInMaintenance = true;
 
-            Task<int> task = CheckHealth();
-            task.Wait();
-
-            int response = task.Result;
-
-            if (response != RESPONSE_SUCCESS)
-            {
-                if (response == RESPONSE_MAINTENANCE)
-                    IsInMaintenance = true;
-
-                return false;
-            }
-
-            return true;
+            return false;
         }
 
-        public static string Url(string path) => $"https://{CurrentUrl}{path}";
+        return true;
+    }
 
-        public static async Task<int> CheckHealth()
+    public static string Url(string path) => $"https://{CurrentUrl}{path}";
+
+    public static async Task<int> CheckHealth()
+    {
+        var response = await Helpers.Http.GetJson<Models.HealthCheck>(Url("/api/health"));
+        
+        return response is null ? RESPONSE_FAILURE : response.Status;
+    }
+
+    public static bool LoadLicense(string license)
+    {
+        // The license is just headers required to access the website in a JSON document
+
+        Dictionary<string, string> headers;
+
+        try
         {
-            var response = await Helpers.Http.GetJson<Models.HealthCheck>(Url("/api/health"));
-            
-            return response is null ? RESPONSE_FAILURE : response.Status;
+            headers = JsonSerializer.Deserialize<Dictionary<string, string>>(license)!;
+        }
+        catch
+        {
+            return false;
+        }
+        
+        for (int i = 0; i < headers.Count; i++)
+        {
+            HttpClient.DefaultRequestHeaders.Add(headers.ElementAt(i).Key, headers.ElementAt(i).Value);
         }
 
-        public static bool LoadLicense(string license)
-        {
-            // the "license" is actually just headers required to access the website.
-            // this can be cloudflare zero-trust headers (like what Kiseki does), or however
-            // else you'd like to do auth-walls. either way; it's just a JSON document 
-
-            try
-            {
-                HttpClient.DefaultRequestHeaders.Clear();
-                
-                var headers = JsonSerializer.Deserialize<Dictionary<string, string>>(license)!;
-
-                for (int i = 0; i < headers.Count; i++)
-                    HttpClient.DefaultRequestHeaders.Add(headers.ElementAt(i).Key, headers.ElementAt(i).Value);
-            }
-            catch
-            {
-                return false;
-            }
-
-            return true;
-        }
+        return true;
     }
 }

@@ -1,8 +1,7 @@
-namespace Kiseki.Launcher.Enums
+namespace Kiseki.Launcher.Enums;
+
+public enum PackageType
 {
-    public enum PackageType
-    {
-        Bootstrapper,
-        Client,
-    }
+    Bootstrapper,
+    Client,
 }
