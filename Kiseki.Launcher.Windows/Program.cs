@@ -19,7 +19,11 @@ namespace Kiseki.Launcher.Windows
                 Directories.Initialize(Path.Combine(Directories.LocalAppData, Constants.PROJECT_NAME));
             }
 
-            Web.Initialize();
+            if (!Web.Initialize())
+            {
+                MessageBox.Show($"Failed to connect to {Constants.PROJECT_NAME}. Please check your internet connection and try again.", Constants.PROJECT_NAME, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
             if (!File.Exists(Directories.Application))
             {
@@ -32,7 +36,7 @@ namespace Kiseki.Launcher.Windows
                 {
                     // Nothing for us to do :P
                     Process.Start(Web.Url("/games"));
-                    Environment.Exit(0);
+                    return;
                 }
 
                 ApplicationConfiguration.Initialize();
