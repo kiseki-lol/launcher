@@ -31,9 +31,17 @@ public class MainWindow : Form
             Buttons = { CloseButton }
         };
 
-        Page.Created += (s, e) =>
+        Page.Created += (_, _) =>
         {
-            Bootstrapper.Run();
+            if (Bootstrapper.Initialize())
+                Bootstrapper.Run();
+        };
+
+        // This is a small hack to ensure that the underlying Form that MainWindow has
+        // doesn't open when the TaskDialogPage is destroyed.
+        Page.Destroyed += (_, _) =>
+        {
+            Environment.Exit(0);
         };
 
         ShowTaskDialog();
@@ -75,8 +83,8 @@ public class MainWindow : Form
 
     private void Bootstrapper_Errored(object? sender, string[] texts)
     {
-        Page.Icon = TaskDialogIcon.Error;
         Page.Heading = texts[0];
         Page.Text = texts[1];
+        Page.ProgressBar!.State = TaskDialogProgressBarState.Error;
     }
 }
