@@ -1,8 +1,10 @@
 namespace Kiseki.Launcher.Windows;
 
-public static class Directories
+public static class Paths
 {
     public static string LocalAppData => Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+    public static string StartMenu => Environment.GetFolderPath(Environment.SpecialFolder.StartMenu);
+    public static string Desktop => Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
 
     public static string Base { get; private set; } = "";
     public static string Logs { get; private set; } = "";

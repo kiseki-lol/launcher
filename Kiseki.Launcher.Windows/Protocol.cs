@@ -6,7 +6,7 @@ public class Protocol : Interfaces.IProtocol
 {
     public static void Register()
     {
-        string arguments = $"\"{Directories.Application}\" \"%1\"";
+        string arguments = $"\"{Paths.Application}\" \"%1\"";
 
         RegistryKey uriKey = Registry.CurrentUser.CreateSubKey(@$"Software\Classes\{Constants.PROTOCOL_KEY}");
         RegistryKey uriIconKey = uriKey.CreateSubKey("DefaultIcon");

@@ -11,12 +11,12 @@ internal static class Program
         if (Path.GetFileName(Path.GetDirectoryName(Application.ExecutablePath))!.ToLower().Contains(Constants.PROJECT_NAME.ToLower()))
         {
             // Set to the current directory (user likely has installed the launcher, seeing as parent folder name contains the project name)
-            Directories.Initialize(Path.GetDirectoryName(Application.ExecutablePath)!);
+            Paths.Initialize(Path.GetDirectoryName(Application.ExecutablePath)!);
         }
         else
         {
             // Set to the default directory (user likely hasn't installed the launcher yet)
-            Directories.Initialize(Path.Combine(Directories.LocalAppData, Constants.PROJECT_NAME));
+            Paths.Initialize(Path.Combine(Paths.LocalAppData, Constants.PROJECT_NAME));
         }
 
         bool isConnected = Web.Initialize();
@@ -43,7 +43,7 @@ internal static class Program
             return;
         }
 
-        if (!File.Exists(Directories.Application))
+        if (!File.Exists(Paths.Application))
         {
             Bootstrapper.Install();
             return;

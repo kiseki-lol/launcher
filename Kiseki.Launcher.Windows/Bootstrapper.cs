@@ -5,6 +5,8 @@ using System.Reflection;
 
 using Microsoft.Win32;
 
+using Syroot.Windows.IO;
+
 public class Bootstrapper : Interfaces.IBootstrapper
 {
     public readonly static string Version = Assembly.GetExecutingAssembly().GetName().Version!.ToString()[..^2];
@@ -88,16 +90,30 @@ public class Bootstrapper : Interfaces.IBootstrapper
         Protocol.Unregister();
         Register();
 
-        Directory.CreateDirectory(Directories.Base);
-        Directory.CreateDirectory(Directories.Versions);
-        Directory.CreateDirectory(Directories.Logs);
+        // Create paths
+        Directory.CreateDirectory(Paths.Base);
+        Directory.CreateDirectory(Paths.Versions);
+        Directory.CreateDirectory(Paths.Logs);
         
-        if (!File.Exists(Directories.Application))
-            File.Copy(Application.ExecutablePath, Directories.Application, true);
+        // Copy ourselves
+        if (!File.Exists(Paths.Application))
+            File.Copy(Application.ExecutablePath, Paths.Application, true);
 
+        // Register us and our protocol handler system-wide
         Register();
         Protocol.Register();
 
+        // Create shortcuts
+        if (File.Exists(Path.Combine(Paths.StartMenu, $"{Constants.PROJECT_NAME}.lnk")))
+            File.Delete(Path.Combine(Paths.StartMenu, $"{Constants.PROJECT_NAME}.lnk"));
+        
+        if (File.Exists(Path.Combine(Paths.Desktop, $"{Constants.PROJECT_NAME}.lnk")))
+            File.Delete(Path.Combine(Paths.Desktop, $"{Constants.PROJECT_NAME}.lnk"));
+        
+        ShellLink.Shortcut.CreateShortcut(Paths.Application, "", Paths.Application, 0).WriteToFile(Path.Combine(Paths.StartMenu, $"{Constants.PROJECT_NAME}.lnk"));
+        ShellLink.Shortcut.CreateShortcut(Paths.Application, "", Paths.Application, 0).WriteToFile(Path.Combine(Paths.Desktop, $"{Constants.PROJECT_NAME}.lnk"));
+
+        // We're finished
         MessageBox.Show($"Sucessfully installed {Constants.PROJECT_NAME}!", Constants.PROJECT_NAME, MessageBoxButtons.OK, MessageBoxIcon.Information);
 
         Environment.Exit((int)Win32.ErrorCode.ERROR_SUCCESS);
@@ -133,14 +149,21 @@ public class Bootstrapper : Interfaces.IBootstrapper
         }
 
         // Delete all files
-        if (Directory.Exists(Directories.Logs))
-            Directory.Delete(Directories.Logs, true);
+        if (Directory.Exists(Paths.Logs))
+            Directory.Delete(Paths.Logs, true);
         
-        if (Directory.Exists(Directories.Versions))
-            Directory.Delete(Directories.Versions, true);
+        if (Directory.Exists(Paths.Versions))
+            Directory.Delete(Paths.Versions, true);
         
-        if (File.Exists(Directories.License))
-            File.Delete(Directories.License);
+        if (File.Exists(Paths.License))
+            File.Delete(Paths.License);
+
+        // Delete our shortcuts
+        if (File.Exists(Path.Combine(Paths.StartMenu, $"{Constants.PROJECT_NAME}.lnk")))
+            File.Delete(Path.Combine(Paths.StartMenu, $"{Constants.PROJECT_NAME}.lnk"));
+        
+        if (File.Exists(Path.Combine(Paths.Desktop, $"{Constants.PROJECT_NAME}.lnk")))
+            File.Delete(Path.Combine(Paths.Desktop, $"{Constants.PROJECT_NAME}.lnk"));
 
         // Cleanup our registry entries
         Unregister();
@@ -149,12 +172,12 @@ public class Bootstrapper : Interfaces.IBootstrapper
         answer = quiet ? DialogResult.OK : MessageBox.Show($"Sucessfully uninstalled {Constants.PROJECT_NAME}!", Constants.PROJECT_NAME, MessageBoxButtons.OK, MessageBoxIcon.Information);
         if (answer == DialogResult.OK || answer == DialogResult.Cancel)
         {
-            string command = $"del /Q \"{Directories.Application}\"";
+            string command = $"del /Q \"{Paths.Application}\"";
 
-            if (Directory.GetFiles(Directories.Base, "*", SearchOption.AllDirectories).Length == 1)
+            if (Directory.GetFiles(Paths.Base, "*", SearchOption.AllDirectories).Length == 1)
             {
                 // We're the only file in the directory, so we can delete the entire directory
-                command += $" && rmdir \"{Directories.Base}\"";
+                command += $" && rmdir \"{Paths.Base}\"";
             }
             
             Process.Start(new ProcessStartInfo()
@@ -179,17 +202,17 @@ public class Bootstrapper : Interfaces.IBootstrapper
         uninstallKey.SetValue("NoModify", 1);
         uninstallKey.SetValue("NoRepair", 1);
 
-        uninstallKey.SetValue("DisplayIcon", $"{Directories.Application},0");
+        uninstallKey.SetValue("DisplayIcon", $"{Paths.Application},0");
         uninstallKey.SetValue("DisplayName", Constants.PROJECT_NAME);
         uninstallKey.SetValue("DisplayVersion", Version);
 
         if (uninstallKey.GetValue("InstallDate") is null)
             uninstallKey.SetValue("InstallDate", DateTime.Now.ToString("yyyyMMdd"));
 
-        uninstallKey.SetValue("InstallLocation", Directories.Base);
+        uninstallKey.SetValue("InstallLocation", Paths.Base);
         uninstallKey.SetValue("Publisher", Constants.PROJECT_NAME);
-        uninstallKey.SetValue("QuietUninstallString", $"\"{Directories.Application}\" -uninstall -quiet");
-        uninstallKey.SetValue("UninstallString", $"\"{Directories.Application}\" -uninstall");
+        uninstallKey.SetValue("QuietUninstallString", $"\"{Paths.Application}\" -uninstall -quiet");
+        uninstallKey.SetValue("UninstallString", $"\"{Paths.Application}\" -uninstall");
         uninstallKey.SetValue("URLInfoAbout", $"https://github.com/{Constants.PROJECT_REPOSITORY}");
         uninstallKey.SetValue("URLUpdateInfo", $"https://github.com/{Constants.PROJECT_REPOSITORY}/releases/latest");
     }
@@ -213,9 +236,9 @@ public class Bootstrapper : Interfaces.IBootstrapper
 
     public static bool License()
     {
-        if (!File.Exists(Directories.License))
+        if (!File.Exists(Paths.License))
         {
-            if (!AskForLicense(Directories.License))
+            if (!AskForLicense(Paths.License))
             {
                 // User doesn't want to license this launcher
                 return false;
@@ -223,12 +246,12 @@ public class Bootstrapper : Interfaces.IBootstrapper
         }
 
         // Load the license...
-        while (!Web.LoadLicense(File.ReadAllText(Directories.License)))
+        while (!Web.LoadLicense(File.ReadAllText(Paths.License)))
         {
             // ...and if it's corrupt, keep asking for a new one.
-            File.Delete(Directories.License);
+            File.Delete(Paths.License);
             MessageBox.Show($"Corrupt license file! Please verify the contents of your license file (it should be named \"license.bin\".)", Constants.PROJECT_NAME, MessageBoxButtons.OK, MessageBoxIcon.Error);
-            AskForLicense(Directories.License, false);
+            AskForLicense(Paths.License, false);
         }
 
         return true;
@@ -236,9 +259,9 @@ public class Bootstrapper : Interfaces.IBootstrapper
 
     public static void Unlicense()
     {
-        if (File.Exists(Directories.License))
+        if (File.Exists(Paths.License))
         {
-            File.Delete(Directories.License);
+            File.Delete(Paths.License);
         }
     }
 
@@ -252,7 +275,7 @@ public class Bootstrapper : Interfaces.IBootstrapper
             {
                 Title = "Select your license file",
                 Filter = "License files (*.bin)|*.bin",
-                InitialDirectory = Win32.GetDownloadsPath()
+                InitialDirectory = KnownFolders.Downloads.Path
             };
 
             if (dialog.ShowDialog() == DialogResult.OK)
