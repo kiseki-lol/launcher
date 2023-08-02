@@ -5,11 +5,11 @@ using Microsoft.Win32;
 
 namespace Kiseki.Launcher.Windows
 {
-    public class Launcher : ILauncher
+    public class Bootstrapper : IBootstrapper
     {
         public readonly static string Version = Assembly.GetExecutingAssembly().GetName().Version!.ToString()[..^2];
 
-        #region ILauncher implementation
+        #region IBootstrapper implementation
 
         public static void Install()
         {

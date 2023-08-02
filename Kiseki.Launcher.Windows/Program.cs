@@ -24,7 +24,7 @@ namespace Kiseki.Launcher.Windows
             if (!isConnected && Web.IsInMaintenance)
             {
                 // Try again with the maintenance domain
-                Launcher.TryLoadLicense();
+                Bootstrapper.TryLoadLicense();
                 isConnected = Web.Initialize();
             }
 
@@ -37,7 +37,7 @@ namespace Kiseki.Launcher.Windows
             if (!File.Exists(Directories.Application))
             {
                 // The launcher is not installed, so let's run the install process - this will also exit the application
-                Launcher.Install();
+                Bootstrapper.Install();
             }
             else
             {
@@ -50,7 +50,7 @@ namespace Kiseki.Launcher.Windows
 
                 if (args[0] == "-uninstall")
                 {
-                    Launcher.Uninstall(args[0] == "-quiet");
+                    Bootstrapper.Uninstall(args[0] == "-quiet");
                     return;
                 }
 

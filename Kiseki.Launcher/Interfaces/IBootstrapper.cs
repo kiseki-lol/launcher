@@ -1,6 +1,6 @@
 namespace Kiseki.Launcher
 {
-    public interface ILauncher
+    public interface IBootstrapper
     {
         static abstract void Install();
         static abstract void Uninstall(bool quiet = false);
