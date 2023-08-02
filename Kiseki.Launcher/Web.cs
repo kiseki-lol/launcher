@@ -15,9 +15,12 @@ namespace Kiseki.Launcher
         public static readonly HttpClient HttpClient = new();
         public static string CurrentUrl { get; private set; } = "";
 
-        public static bool Initialize()
+        public static bool Initialize(bool setBaseUrl = true)
         {
-            CurrentUrl = BASE_URL;
+            if (setBaseUrl)
+            {
+                CurrentUrl = BASE_URL;
+            }
 
             int response = CheckHealth();
             
@@ -26,7 +29,7 @@ namespace Kiseki.Launcher
                 if (response == RESPONSE_MAINTENANCE)
                 {
                     CurrentUrl = $"{MAINTENANCE_DOMAIN}.{BASE_URL}";
-                    return Initialize();
+                    return Initialize(false);
                 }
 
                 return false;
