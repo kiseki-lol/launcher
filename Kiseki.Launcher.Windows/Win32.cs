@@ -2,8 +2,8 @@ namespace Kiseki.Launcher.Windows;
 
 public static class Win32
 {
-    // Ref: https://learn.microsoft.com/en-us/windows/win32/msi/error-codes
-    // Ref: https://i-logic.com/serial/errorcodes.htm
+    // REF: https://learn.microsoft.com/en-us/windows/win32/msi/error-codes
+    // REF: https://i-logic.com/serial/errorcodes.htm
     public enum ErrorCode
     {
         ERROR_SUCCESS = 0,

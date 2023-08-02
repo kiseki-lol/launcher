@@ -13,7 +13,7 @@ public class MainWindow : Form
     {
         Bootstrapper = new Bootstrapper(payload);
         Bootstrapper.OnHeadingChange += Bootstrapper_HeadingChanged;
-        Bootstrapper.OnProgressBarAdd += Bootstrapper_ProgressBarAdded;
+        Bootstrapper.OnProgressBarSet += Bootstrapper_ProgressBarSet;
         Bootstrapper.OnProgressBarStateChange += Bootstrapper_ProgressBarStateChanged;
         Bootstrapper.OnError += Bootstrapper_Errored;
 
@@ -72,9 +72,9 @@ public class MainWindow : Form
         Page.Heading = heading;
     }
 
-    private void Bootstrapper_ProgressBarAdded(object? sender, int value)
+    private void Bootstrapper_ProgressBarSet(object? sender, int value)
     {
-        Page.ProgressBar!.Value += value;
+        Page.ProgressBar!.Value = value;
     }
 
     private void Bootstrapper_ProgressBarStateChanged(object? sender, Enums.ProgressBarState state)

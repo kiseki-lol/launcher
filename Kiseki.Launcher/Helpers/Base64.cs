@@ -4,7 +4,7 @@ using System.Text;
 
 public static class Base64
 {
-    // Source: https://stackoverflow.com/a/54143400
+    // REF: https://stackoverflow.com/a/54143400
     public static bool IsBase64String(string base64)
     {
         Span<byte> buffer = new(new byte[base64.Length]);

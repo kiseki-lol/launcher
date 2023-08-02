@@ -1,10 +1,13 @@
 namespace Kiseki.Launcher.Windows;
 
 using System.Diagnostics;
+using System.Net;
 using System.Reflection;
 
-using Microsoft.Win32;
+using Kiseki.Launcher.Helpers;
+using Kiseki.Launcher.Models;
 
+using Microsoft.Win32;
 using Syroot.Windows.IO;
 
 public class Bootstrapper : Interfaces.IBootstrapper
@@ -15,7 +18,7 @@ public class Bootstrapper : Interfaces.IBootstrapper
     private readonly Dictionary<string, string> Arguments = new();
 
     public event EventHandler<string>? OnHeadingChange;
-    public event EventHandler<int>? OnProgressBarAdd;
+    public event EventHandler<int>? OnProgressBarSet;
     public event EventHandler<Enums.ProgressBarState>? OnProgressBarStateChange;
     public event EventHandler<string[]>? OnError;
 
@@ -46,9 +49,66 @@ public class Bootstrapper : Interfaces.IBootstrapper
         return true;
     }
 
-    public void Run()
+    public async void Run()
     {
-        //
+        // Check for updates
+        HeadingChange("Checking for updates...");
+        
+        // Check for a new launcher release from GitHub
+        var release = await Http.GetJson<GitHubRelease>($"https://api.github.com/repos/{Constants.PROJECT_REPOSITORY}/releases/latest");
+        bool launcherUpToDate = true;
+
+        // TODO: We can remove this check once we do our first release.
+        if (release is not null && release.Assets is not null)
+        {
+            launcherUpToDate = Version == release.TagName[1..];
+
+            if (!launcherUpToDate)
+            {
+                // Update the launcher
+                HeadingChange("Getting the latest launcher...");
+                ProgressBarStateChange(Enums.ProgressBarState.Normal);
+
+                // TODO: This needs to be rewritten. It's a mess.
+                // REF: https://stackoverflow.com/a/9459441
+                Thread thread = new(() => {
+                    using WebClient client = new();
+
+                    client.DownloadProgressChanged += (_, e) => {
+                        double bytesIn = double.Parse(e.BytesReceived.ToString());
+                        double totalBytes = double.Parse(e.TotalBytesToReceive.ToString());
+                        double percentage = bytesIn / totalBytes * 100;
+
+                        ProgressBarSet(int.Parse(Math.Truncate(percentage).ToString()));
+                    };
+
+                    client.DownloadFileCompleted += (_, _) => {
+                        HeadingChange("Installing the latest launcher...");
+                        ProgressBarStateChange(Enums.ProgressBarState.Marquee);
+
+                        // Rename Kiseki.Launcher.exe.new -> Kiseki.Launcher.exe, and launch it with our payload
+                        string command = $"del /Q \"{Paths.Application}\" && move /Y \"{Paths.Application}.new\" \"{Paths.Application}\" && start \"\" \"{Paths.Application}\" {Payload}";
+
+                        Process.Start(new ProcessStartInfo()
+                        {
+                            FileName = "cmd.exe",
+                            Arguments = $"/c timeout 1 && {command}",
+                            UseShellExecute = true,
+                            WindowStyle = ProcessWindowStyle.Hidden
+                        });
+
+                        Environment.Exit((int)Win32.ErrorCode.ERROR_SUCCESS);
+                    };
+
+                    client.DownloadFileAsync(new Uri(release.Assets[0].BrowserDownloadUrl), $"{Paths.Application}.new");
+                });
+
+                thread.Start();
+
+                return;
+            }
+        }
+
     }
 
     public void Abort()
@@ -63,9 +123,9 @@ public class Bootstrapper : Interfaces.IBootstrapper
         OnHeadingChange!.Invoke(this, heading);
     }
 
-    protected virtual void ProgressBarAdd(int value)
+    protected virtual void ProgressBarSet(int value)
     {
-        OnProgressBarAdd!.Invoke(this, value);
+        OnProgressBarSet!.Invoke(this, value);
     }
 
     protected virtual void ProgressBarStateChange(Enums.ProgressBarState state)

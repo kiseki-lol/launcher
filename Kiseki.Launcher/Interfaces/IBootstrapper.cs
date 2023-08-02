@@ -4,7 +4,7 @@ public interface IBootstrapper
 {
     // These connect to MainWindow
     event EventHandler<string>? OnHeadingChange;
-    event EventHandler<int>? OnProgressBarAdd;
+    event EventHandler<int>? OnProgressBarSet;
     event EventHandler<Enums.ProgressBarState>? OnProgressBarStateChange;
     event EventHandler<string[]>? OnError;
     
