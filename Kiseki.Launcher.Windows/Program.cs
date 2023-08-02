@@ -19,7 +19,15 @@ namespace Kiseki.Launcher.Windows
                 Directories.Initialize(Path.Combine(Directories.LocalAppData, Constants.PROJECT_NAME));
             }
 
-            if (!Web.Initialize())
+            bool isConnected = Web.Initialize();
+            if (!isConnected && Web.IsInMaintenance)
+            {
+                // Try again with the maintenance domain
+                Launcher.TryLoadLicense();
+                isConnected = Web.Initialize();
+            }
+
+            if (!isConnected)
             {
                 MessageBox.Show($"Failed to connect to {Constants.PROJECT_NAME}. Please check your internet connection and try again.", Constants.PROJECT_NAME, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
