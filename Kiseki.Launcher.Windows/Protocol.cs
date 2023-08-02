@@ -4,13 +4,11 @@ namespace Kiseki.Launcher.Windows
 {
     public class Protocol : IProtocol
     {
-        public const string PROTOCOL_KEY = "kiseki";
-
         public static void Register()
         {
             string arguments = $"\"{Directories.Application}\" \"%1\"";
 
-            RegistryKey uriKey = Registry.CurrentUser.CreateSubKey(@$"Software\Classes\{PROTOCOL_KEY}");
+            RegistryKey uriKey = Registry.CurrentUser.CreateSubKey(@$"Software\Classes\{Constants.PROTOCOL_KEY}");
             RegistryKey uriIconKey = uriKey.CreateSubKey("DefaultIcon");
             RegistryKey uriCommandKey = uriKey.CreateSubKey(@"shell\open\command");
 
@@ -32,7 +30,16 @@ namespace Kiseki.Launcher.Windows
 
         public static void Unregister()
         {
-            Registry.CurrentUser.DeleteSubKeyTree(@$"Software\Classes\{PROTOCOL_KEY}");
+            try
+            {
+                Registry.CurrentUser.DeleteSubKeyTree(@$"Software\Classes\{Constants.PROTOCOL_KEY}");
+            }
+            catch
+            {
+#if DEBUG
+                throw;
+#endif
+            }
         }
     }
 }

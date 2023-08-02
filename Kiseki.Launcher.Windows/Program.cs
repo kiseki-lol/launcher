@@ -7,11 +7,12 @@ namespace Kiseki.Launcher.Windows
         [STAThread]
         static void Main(string[] args)
         {
-            string parentFolder = Path.GetDirectoryName(AppContext.BaseDirectory)!;
-            if (parentFolder.ToLower().Contains(Constants.PROJECT_NAME))
+            string parentFolder = Path.GetDirectoryName(Application.ExecutablePath)!;
+
+            if (Path.GetDirectoryName(parentFolder)!.ToLower().Contains(Constants.PROJECT_NAME.ToLower()))
             {
                 // Set to the current directory (either user-installed or default; it has "Kiseki" in the path, so that's good enough for us)
-                Directories.Initialize(AppContext.BaseDirectory);
+                Directories.Initialize(parentFolder);
             }
             else
             {
@@ -43,11 +44,11 @@ namespace Kiseki.Launcher.Windows
                 if (args.Length == 0)
                 {
                     // Nothing for us to do :P
-                    Process.Start(Web.Url("/games"));
+                    Process.Start($"open {Web.Url("/games")}");
                     return;
                 }
 
-                if (args[0] == "uninstall")
+                if (args[0] == "-uninstall")
                 {
                     Launcher.Uninstall(args[0] == "-quiet");
                     return;

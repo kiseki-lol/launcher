@@ -13,7 +13,22 @@ namespace Kiseki.Launcher.Windows
 
         public static void Install()
         {
+            // Cleanup our registry entries beforehand (if they exist)
+            Protocol.Unregister();
+            Register();
+
             Directory.CreateDirectory(Directories.Base);
+            Directory.CreateDirectory(Directories.Versions);
+            Directory.CreateDirectory(Directories.Logs);
+            
+            File.Copy(Application.ExecutablePath, Directories.Application, true);
+
+            Register();
+            Protocol.Register();
+
+            MessageBox.Show($"Sucessfully installed {Constants.PROJECT_NAME}!", Constants.PROJECT_NAME, MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            Environment.Exit((int)Win32.ErrorCode.ERROR_SUCCESS);
         }
 
         public static void Uninstall(bool quiet = false)
@@ -46,9 +61,14 @@ namespace Kiseki.Launcher.Windows
             }
 
             // Delete all files
-            Directory.Delete(Directories.Logs, true);
-            Directory.Delete(Directories.Versions, true);
-            Directory.Delete(Directories.License);
+            if (Directory.Exists(Directories.Logs))
+                Directory.Delete(Directories.Logs, true);
+            
+            if (Directory.Exists(Directories.Versions))
+                Directory.Delete(Directories.Versions, true);
+            
+            if (File.Exists(Directories.License))
+                File.Delete(Directories.License);
 
             // Cleanup our registry entries
             Unregister();
@@ -78,9 +98,12 @@ namespace Kiseki.Launcher.Windows
         }
 
         public static void Register()
-        {
+        {            
             using RegistryKey uninstallKey = Registry.CurrentUser.CreateSubKey($@"Software\Microsoft\Windows\CurrentVersion\Uninstall\{Constants.PROJECT_NAME}");
             
+            uninstallKey.SetValue("NoModify", 1);
+            uninstallKey.SetValue("NoRepair", 1);
+
             uninstallKey.SetValue("DisplayIcon", $"{Directories.Application},0");
             uninstallKey.SetValue("DisplayName", Constants.PROJECT_NAME);
             uninstallKey.SetValue("DisplayVersion", Version);
@@ -89,9 +112,7 @@ namespace Kiseki.Launcher.Windows
                 uninstallKey.SetValue("InstallDate", DateTime.Now.ToString("yyyyMMdd"));
 
             uninstallKey.SetValue("InstallLocation", Directories.Base);
-            uninstallKey.SetValue("NoRepair", 1);
             uninstallKey.SetValue("Publisher", Constants.PROJECT_NAME);
-            uninstallKey.SetValue("ModifyPath", $"\"{Directories.Application}\" -menu");
             uninstallKey.SetValue("QuietUninstallString", $"\"{Directories.Application}\" -uninstall -quiet");
             uninstallKey.SetValue("UninstallString", $"\"{Directories.Application}\" -uninstall");
             uninstallKey.SetValue("URLInfoAbout", $"https://github.com/{Constants.PROJECT_REPOSITORY}");
@@ -151,7 +172,6 @@ namespace Kiseki.Launcher.Windows
 
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
-                    Directory.CreateDirectory(Directories.Base); // failsafe
                     File.Copy(dialog.FileName, licensePath, true);
                 }
 

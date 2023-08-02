@@ -14,6 +14,12 @@ namespace Kiseki.Launcher.Windows
         {
             Base = baseDirectory;
 
+            if (!Directory.Exists(Base))
+            {
+                // just in case
+                Directory.CreateDirectory(Base);
+            }
+
             Logs = Path.Combine(Base, "Logs");
             Versions = Path.Combine(Base, "Versions");
 

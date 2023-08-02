@@ -9,9 +9,6 @@ namespace Kiseki.Launcher
         public const int RESPONSE_SUCCESS = 0;
         public const int RESPONSE_MAINTENANCE = 1;
         
-        public const string BASE_URL = "kiseki.lol";
-        public const string MAINTENANCE_DOMAIN = "test";
-        
         public static string CurrentUrl { get; private set; } = "";
         public static bool IsInMaintenance { get; private set; } = false;
 
@@ -19,7 +16,7 @@ namespace Kiseki.Launcher
 
         public static bool Initialize()
         {
-            CurrentUrl = IsInMaintenance ? $"{MAINTENANCE_DOMAIN}.{BASE_URL}" : BASE_URL;
+            CurrentUrl = IsInMaintenance ? $"{Constants.MAINTENANCE_DOMAIN}.{Constants.BASE_URL}" : Constants.BASE_URL;
 
             Task<int> task = CheckHealth();
             task.Wait();
