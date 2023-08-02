@@ -7,11 +7,12 @@ namespace Kiseki.Launcher.Windows
         [STAThread]
         static void Main(string[] args)
         {
+            // Initialize directories
             string parentFolder = Path.GetDirectoryName(Application.ExecutablePath)!;
 
             if (Path.GetDirectoryName(parentFolder)!.ToLower().Contains(Constants.PROJECT_NAME.ToLower()))
             {
-                // Set to the current directory (either user-installed or default; it has "Kiseki" in the path, so that's good enough for us)
+                // Set to the current directory (user likely has installed the launcher, seeing as parent folder name contains the project name)
                 Directories.Initialize(parentFolder);
             }
             else
@@ -23,40 +24,49 @@ namespace Kiseki.Launcher.Windows
             bool isConnected = Web.Initialize();
             if (!isConnected && Web.IsInMaintenance)
             {
-                // Try again with the maintenance domain
-                Bootstrapper.TryLoadLicense();
+                // Try licensing this launcher and attempt to connect again
+                Bootstrapper.License();
                 isConnected = Web.Initialize();
             }
 
             if (!isConnected)
             {
+                if (Web.IsInMaintenance)
+                {
+                    // Unlicense this launcher
+                    Bootstrapper.Unlicense();
+                }
+
                 MessageBox.Show($"Failed to connect to {Constants.PROJECT_NAME}. Please check your internet connection and try again.", Constants.PROJECT_NAME, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
             if (!File.Exists(Directories.Application))
             {
-                // The launcher is not installed, so let's run the install process - this will also exit the application
                 Bootstrapper.Install();
+                return;
             }
-            else
+
+            if (args.Length == 0)
             {
-                if (args.Length == 0)
+                // Nothing for us to do :P
+                Process.Start(new ProcessStartInfo()
                 {
-                    // Nothing for us to do :P
-                    Process.Start($"open {Web.Url("/games")}");
-                    return;
-                }
+                    FileName = Web.Url("/games"),
+                    UseShellExecute = true
+                });
 
-                if (args[0] == "-uninstall")
-                {
-                    Bootstrapper.Uninstall(args[0] == "-quiet");
-                    return;
-                }
-
-                ApplicationConfiguration.Initialize();
-                Application.Run(new MainWindow(args[0]));
+                return;
             }
+
+            if (args[0] == "-uninstall")
+            {
+                Bootstrapper.Uninstall(args[0] == "-quiet");
+                return;
+            }
+
+            ApplicationConfiguration.Initialize();
+            Application.Run(new MainWindow(args[0]));
         }
     }
 }

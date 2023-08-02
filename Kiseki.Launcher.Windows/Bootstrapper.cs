@@ -9,7 +9,78 @@ namespace Kiseki.Launcher.Windows
     {
         public readonly static string Version = Assembly.GetExecutingAssembly().GetName().Version!.ToString()[..^2];
 
-        #region IBootstrapper implementation
+        private readonly string Payload;
+        private readonly Dictionary<string, string> Arguments = new();
+
+        public event EventHandler<string>? OnHeadingChange;
+        public event EventHandler<int>? OnProgressBarAdd;
+        public event EventHandler<Enums.ProgressBarState>? OnProgressBarStateChange;
+        public event EventHandler<string[]>? OnError;
+
+        public Bootstrapper(string payload)
+        {
+            Payload = payload;
+        }
+
+        public bool Initialize()
+        {
+            if (!Helpers.Base64.IsBase64String(Payload))
+            {
+                Error($"Failed to launch {Constants.PROJECT_NAME}", $"Try launching {Constants.PROJECT_NAME} from the website again.");
+                return false;
+            }
+            
+            // mode, version, ticket, joinscript
+            string[] pieces = Helpers.Base64.ConvertBase64ToString(Payload).Split("|");
+            if (pieces.Length != 4)
+            {
+                Error($"Failed to launch {Constants.PROJECT_NAME}", $"Try launching {Constants.PROJECT_NAME} from the website again.");
+                return false;
+            }
+
+            Arguments["Mode"] = pieces[0];
+            Arguments["Version"] = pieces[1];
+            Arguments["Ticket"] = pieces[2];
+            Arguments["JoinScript"] = pieces[3];
+
+            return true;
+        }
+
+        public void Run()
+        {
+            //
+        }
+
+        public void Abort()
+        {
+            //
+        }
+
+        #region MainWindow
+
+        protected virtual void HeadingChange(string heading)
+        {
+            OnHeadingChange!.Invoke(this, heading);
+        }
+
+        protected virtual void ProgressBarAdd(int value)
+        {
+            OnProgressBarAdd!.Invoke(this, value);
+        }
+
+        protected virtual void ProgressBarStateChange(Enums.ProgressBarState state)
+        {
+            OnProgressBarStateChange!.Invoke(this, state);
+        }
+
+        protected virtual void Error(string heading, string text)
+        {
+            // ugly hack for now (I don't want to derive EventHandler just for this)
+            OnError!.Invoke(this, new string[] { heading, text });
+        }
+
+        #endregion
+        #region Installation
 
         public static void Install()
         {
@@ -97,6 +168,9 @@ namespace Kiseki.Launcher.Windows
             }
         }
 
+        #endregion
+        #region Registration
+
         public static void Register()
         {            
             using RegistryKey uninstallKey = Registry.CurrentUser.CreateSubKey($@"Software\Microsoft\Windows\CurrentVersion\Uninstall\{Constants.PROJECT_NAME}");
@@ -136,7 +210,7 @@ namespace Kiseki.Launcher.Windows
         #endregion
         #region Licensing
 
-        public static void TryLoadLicense()
+        public static void License()
         {
             if (!File.Exists(Directories.License))
             {
@@ -154,6 +228,14 @@ namespace Kiseki.Launcher.Windows
                 File.Delete(Directories.License);
                 MessageBox.Show($"Corrupt license file! Please verify the contents of your license file (it should be named \"license.bin\".)", Constants.PROJECT_NAME, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 AskForLicense(Directories.License, false);
+            }
+        }
+
+        public static void Unlicense()
+        {
+            if (File.Exists(Directories.License))
+            {
+                File.Delete(Directories.License);
             }
         }
 
