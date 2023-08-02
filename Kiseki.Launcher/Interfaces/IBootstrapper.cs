@@ -22,6 +22,6 @@ public interface IBootstrapper
     static abstract void Unregister();
 
     // Licensing the launcher
-    static abstract void License();
+    static abstract bool License();
     static abstract void Unlicense();
 }

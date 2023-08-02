@@ -92,7 +92,8 @@ public class Bootstrapper : Interfaces.IBootstrapper
         Directory.CreateDirectory(Directories.Versions);
         Directory.CreateDirectory(Directories.Logs);
         
-        File.Copy(Application.ExecutablePath, Directories.Application, true);
+        if (!File.Exists(Directories.Application))
+            File.Copy(Application.ExecutablePath, Directories.Application, true);
 
         Register();
         Protocol.Register();
@@ -210,14 +211,14 @@ public class Bootstrapper : Interfaces.IBootstrapper
     #endregion
     #region Licensing
 
-    public static void License()
+    public static bool License()
     {
         if (!File.Exists(Directories.License))
         {
             if (!AskForLicense(Directories.License))
             {
                 // User doesn't want to license this launcher
-                return;
+                return false;
             }
         }
 
@@ -229,6 +230,8 @@ public class Bootstrapper : Interfaces.IBootstrapper
             MessageBox.Show($"Corrupt license file! Please verify the contents of your license file (it should be named \"license.bin\".)", Constants.PROJECT_NAME, MessageBoxButtons.OK, MessageBoxIcon.Error);
             AskForLicense(Directories.License, false);
         }
+
+        return true;
     }
 
     public static void Unlicense()

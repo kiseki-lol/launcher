@@ -22,7 +22,7 @@ public static class Directories
         Logs = Path.Combine(Base, "Logs");
         Versions = Path.Combine(Base, "Versions");
 
-        License = Path.Combine(Base, "license.bin");
+        License = Path.Combine(Base, "License.bin");
         Application = Path.Combine(Base, $"{Constants.PROJECT_NAME}.Launcher.exe");
     }
 }

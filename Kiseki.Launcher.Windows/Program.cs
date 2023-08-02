@@ -8,12 +8,10 @@ internal static class Program
     static void Main(string[] args)
     {
         // Initialize directories
-        string parentFolder = Path.GetDirectoryName(Application.StartupPath)!;
-
-        if (Path.GetDirectoryName(parentFolder)!.ToLower().Contains(Constants.PROJECT_NAME.ToLower()))
+        if (Path.GetFileName(Path.GetDirectoryName(Application.ExecutablePath))!.ToLower().Contains(Constants.PROJECT_NAME.ToLower()))
         {
             // Set to the current directory (user likely has installed the launcher, seeing as parent folder name contains the project name)
-            Directories.Initialize(parentFolder);
+            Directories.Initialize(Path.GetDirectoryName(Application.ExecutablePath)!);
         }
         else
         {
@@ -25,7 +23,11 @@ internal static class Program
         if (!isConnected && Web.IsInMaintenance)
         {
             // Try licensing this launcher and attempt to connect again
-            Bootstrapper.License();
+            if (!Bootstrapper.License())
+            {
+                return;
+            }
+
             isConnected = Web.Initialize();
         }
 
