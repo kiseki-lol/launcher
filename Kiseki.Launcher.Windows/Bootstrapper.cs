@@ -28,7 +28,6 @@ public class Bootstrapper : Interfaces.IBootstrapper
     {
         if (!Helpers.Base64.IsBase64String(Payload))
         {
-            Error($"Failed to launch {Constants.PROJECT_NAME}", $"Try launching {Constants.PROJECT_NAME} from the website again.");
             return false;
         }
         
@@ -36,7 +35,6 @@ public class Bootstrapper : Interfaces.IBootstrapper
         string[] pieces = Helpers.Base64.ConvertBase64ToString(Payload).Split("|");
         if (pieces.Length != 4)
         {
-            Error($"Failed to launch {Constants.PROJECT_NAME}", $"Try launching {Constants.PROJECT_NAME} from the website again.");
             return false;
         }
 

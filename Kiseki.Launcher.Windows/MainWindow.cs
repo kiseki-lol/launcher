@@ -33,8 +33,14 @@ public class MainWindow : Form
 
         Page.Created += (_, _) =>
         {
-            if (Bootstrapper.Initialize())
-                Bootstrapper.Run();
+            if (!Bootstrapper.Initialize())
+            {
+                // hack
+                Bootstrapper_Errored(null, new string[] { $"Failed to launch {Constants.PROJECT_NAME}", $"Try launching {Constants.PROJECT_NAME} from the website again." });
+                return;
+            }
+            
+            Bootstrapper.Run();
         };
 
         // This is a small hack to ensure that the underlying Form that MainWindow has
