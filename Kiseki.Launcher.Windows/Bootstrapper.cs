@@ -165,7 +165,7 @@ public class Bootstrapper : Interfaces.IBootstrapper
             Directory.CreateDirectory(Path.Combine(Paths.Versions, Arguments["Version"]));
 
             // Download archive
-            Task.WaitAny(Task.Factory.StartNew(() => {
+            Task.WaitAny(Task.Factory.StartNew(async () => {
                 using WebClient client = new();
                 bool finished = false;
 
@@ -181,7 +181,7 @@ public class Bootstrapper : Interfaces.IBootstrapper
 
                 client.DownloadFileAsync(new Uri(clientRelease.Asset.Url), Path.Combine(Paths.Versions, Arguments["Version"], "archive.zip"));
 
-                while (!finished) Task.Delay(100);
+                while (!finished) await Task.Delay(100);
             }));
             
             // Compare archive checksum
