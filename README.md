@@ -3,7 +3,7 @@
 [![GitHub Build Status](https://img.shields.io/github/actions/workflow/status/kiseki-lol/launcher/build.yml?branch=trunk&label=builds)](https://github.com/kiseki-lol/launcher/actions)
 [![Star](https://img.shields.io/github/stars/kiseki-lol/launcher?style=social)](https://github.com/kiseki-lol/launcher/stargazers)
 
-Launches Kiseki game clients from the website. Requires [.NET Runtime 7.0.x](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)
+Launches Kiseki game clients from the website
 
 # License
 Kiseki.Launcher is licensed under the [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.md). A copy of it has been included with Kiseki.Launcher.
