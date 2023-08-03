@@ -11,7 +11,6 @@ public interface IBootstrapper
     // Actual bootstrapping
     bool Initialize();
     void Run();
-    void Abort();
 
     // Installation (i.e. putting the launcher in the Kiseki folder)
     static abstract void Install();

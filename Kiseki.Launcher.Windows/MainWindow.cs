@@ -35,8 +35,10 @@ public class MainWindow : Form
         {
             if (!Bootstrapper.Initialize())
             {
-                // hack
-                Bootstrapper_Errored(null, new string[] { $"Failed to launch {Constants.PROJECT_NAME}", $"Try launching {Constants.PROJECT_NAME} from the website again." });
+                Page.Heading = $"Failed to launch {Constants.PROJECT_NAME}";
+                Page.Text = $"Try launching {Constants.PROJECT_NAME} from the website again.";
+                Page.ProgressBar!.State = TaskDialogProgressBarState.Error;
+
                 return;
             }
             
@@ -63,7 +65,6 @@ public class MainWindow : Form
 
     private void CloseButton_Click(object? sender, EventArgs e)
     {
-        Bootstrapper.Abort();
         Environment.Exit(0);
     }
 

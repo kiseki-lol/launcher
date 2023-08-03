@@ -1,8 +1,10 @@
 namespace Kiseki.Launcher.Windows;
 
 using System.Diagnostics;
+using System.IO.Compression;
 using System.Net;
 using System.Reflection;
+using System.Security.Cryptography;
 
 using Kiseki.Launcher.Helpers;
 using Kiseki.Launcher.Models;
@@ -29,13 +31,13 @@ public class Bootstrapper : Interfaces.IBootstrapper
 
     public bool Initialize()
     {
-        if (!Helpers.Base64.IsBase64String(Payload))
+        if (!Base64.IsBase64String(Payload))
         {
             return false;
         }
         
         // { mode, version, ticket, joinscript }
-        string[] pieces = Helpers.Base64.ConvertBase64ToString(Payload).Split("|");
+        string[] pieces = Base64.ConvertBase64ToString(Payload).Split("|");
         if (pieces.Length != 4)
         {
             return false;
@@ -55,13 +57,13 @@ public class Bootstrapper : Interfaces.IBootstrapper
         HeadingChange("Checking for updates...");
         
         // Check for a new launcher release from GitHub
-        var release = await Http.GetJson<GitHubRelease>($"https://api.github.com/repos/{Constants.PROJECT_REPOSITORY}/releases/latest");
+        var launcherRelease = await Http.GetJson<GitHubRelease>($"https://api.github.com/repos/{Constants.PROJECT_REPOSITORY}/releases/latest");
         bool launcherUpToDate = true;
 
         // TODO: We can remove this check once we do our first release.
-        if (release is not null && release.Assets is not null)
+        if (launcherRelease is not null && launcherRelease.Assets is not null)
         {
-            launcherUpToDate = Version == release.TagName[1..];
+            launcherUpToDate = Version == launcherRelease.TagName[1..];
 
             if (!launcherUpToDate)
             {
@@ -100,7 +102,7 @@ public class Bootstrapper : Interfaces.IBootstrapper
                         Environment.Exit((int)Win32.ErrorCode.ERROR_SUCCESS);
                     };
 
-                    client.DownloadFileAsync(new Uri(release.Assets[0].BrowserDownloadUrl), $"{Paths.Application}.new");
+                    client.DownloadFileAsync(new Uri(launcherRelease.Assets[0].BrowserDownloadUrl), $"{Paths.Application}.new");
                 });
 
                 thread.Start();
@@ -109,11 +111,142 @@ public class Bootstrapper : Interfaces.IBootstrapper
             }
         }
 
-    }
+        var clientRelease = await Http.GetJson<ClientRelease>(Web.Url($"/api/setup/{Arguments["Version"]}"));
+        bool clientUpToDate = true;
+        bool createStudioShortcut = false;
 
-    public void Abort()
-    {
-        //
+        if (clientRelease is null)
+        {
+            Error($"Failed to check for {Constants.PROJECT_NAME} updates", $"Failed to check for {Constants.PROJECT_NAME} updates. Please try again later.");
+            return;
+        }
+
+        if (!Directory.Exists(Path.Combine(Paths.Versions, Arguments["Version"])))
+        {
+            Directory.CreateDirectory(Path.Combine(Paths.Versions, Arguments["Version"]));
+            clientUpToDate = false;
+            createStudioShortcut = true;
+        }
+        else
+        {
+            // Compute checksums of the required binaries
+            for (int i = 0; i < clientRelease.Checksums.Count; i++)
+            {
+                string file = clientRelease.Checksums.ElementAt(i).Key;
+                string checksum = clientRelease.Checksums.ElementAt(i).Value;
+
+                if (!File.Exists(Path.Combine(Paths.Versions, Arguments["Version"], file)))
+                {
+                    clientUpToDate = false;
+                    createStudioShortcut = true;
+                    break;
+                }
+
+                using SHA256 SHA256 = SHA256.Create();
+                using FileStream fileStream = File.OpenRead(Path.Combine(Paths.Versions, Arguments["Version"], file));
+
+                string computedChecksum = Convert.ToBase64String(SHA256.ComputeHash(fileStream));
+
+                if (checksum != computedChecksum)
+                {
+                    clientUpToDate = false;
+                    break;
+                }
+            }
+        }
+
+        if (!clientUpToDate)
+        {
+            // Download the required binaries
+            HeadingChange($"Getting the latest Kiseki {Arguments["Version"]}...");
+
+            // Delete all files in the version directory
+            Directory.Delete(Path.Combine(Paths.Versions, Arguments["Version"]), true);
+            Directory.CreateDirectory(Path.Combine(Paths.Versions, Arguments["Version"]));
+
+            // Download archive
+            Task.WaitAny(Task.Factory.StartNew(() => {
+                using WebClient client = new();
+                bool finished = false;
+
+                client.DownloadProgressChanged += (_, e) => {
+                    double bytesIn = double.Parse(e.BytesReceived.ToString());
+                    double totalBytes = double.Parse(e.TotalBytesToReceive.ToString());
+                    double percentage = bytesIn / totalBytes * 100;
+
+                    ProgressBarSet(int.Parse(Math.Truncate(percentage).ToString()));
+                };
+
+                client.DownloadFileCompleted += (_, _) => finished = true;
+
+                client.DownloadFileAsync(new Uri(clientRelease.Asset.Url), Path.Combine(Paths.Versions, Arguments["Version"], "archive.zip"));
+
+                while (!finished) Task.Delay(100);
+            }));
+            
+            // Compare archive checksum
+            using SHA256 SHA256 = SHA256.Create();
+            using FileStream fileStream = File.OpenRead(Path.Combine(Paths.Versions, Arguments["Version"], "archive.zip"));
+
+            string computedChecksum = Convert.ToBase64String(SHA256.ComputeHash(fileStream));
+
+            if (clientRelease.Asset.Checksum != computedChecksum)
+            {
+                Error($"Failed to update {Constants.PROJECT_NAME} {Arguments["Version"]}", $"Failed to update {Constants.PROJECT_NAME}. Please try again later.");
+                return;
+            }
+
+            // Extract archive
+            HeadingChange($"Installing Kiseki {Arguments["Version"]}...");
+            ProgressBarStateChange(Enums.ProgressBarState.Marquee);
+
+            ZipFile.ExtractToDirectory(Path.Combine(Paths.Versions, Arguments["Version"], "archive.zip"), Path.Combine(Paths.Versions, Arguments["Version"]));
+            File.Delete(Path.Combine(Paths.Versions, Arguments["Version"], "archive.zip"));
+        }
+
+        if (createStudioShortcut)
+        {
+            if (!Directory.Exists(Paths.StartMenu))
+                Directory.CreateDirectory(Paths.StartMenu);
+            
+            if (File.Exists(Path.Combine(Paths.StartMenu, $"{Constants.PROJECT_NAME} Studio {Arguments["Version"]}.lnk")))
+                File.Delete(Path.Combine(Paths.StartMenu, $"{Constants.PROJECT_NAME} Studio {Arguments["Version"]}.lnk"));
+            
+            string studioPath = Path.Combine(Paths.Versions, Arguments["Version"], $"{Constants.PROJECT_NAME}.Studio.exe");
+
+            ShellLink.Shortcut.CreateShortcut(studioPath, "", studioPath, 0)
+                .WriteToFile(Path.Combine(Paths.StartMenu, $"{Constants.PROJECT_NAME} Studio {Arguments["Version"]}.lnk"));
+        }
+
+        // We're done! Launch the game.
+        HeadingChange("Launching Kiseki...");
+
+        Process player = new()
+        {
+            StartInfo = new()
+            {
+                FileName = Path.Combine(Paths.Versions, Arguments["Version"], $"{Constants.PROJECT_NAME}.Player.exe"),
+                Arguments = $"-a \"{Web.Url("/Login/Negotiate.ashx")}\" -t \"{Arguments["Ticket"]}\" -j \"{Arguments["JoinScript"]}\"",
+                UseShellExecute = true,
+            }
+        };
+
+        Thread waiter = new(() => {
+            bool launched = false;
+
+            while (!launched)
+            {
+                Thread.Sleep(100);
+                launched = Win32.IsWindowVisible(player.MainWindowHandle);
+            }
+
+            Environment.Exit((int)Win32.ErrorCode.ERROR_SUCCESS);
+        });
+
+        player.Start();
+        player.WaitForInputIdle();
+
+        waiter.Start();
     }
 
     #region MainWindow
@@ -162,14 +295,23 @@ public class Bootstrapper : Interfaces.IBootstrapper
         Protocol.Register();
 
         // Create shortcuts
-        if (File.Exists(Path.Combine(Paths.StartMenu, $"{Constants.PROJECT_NAME}.lnk")))
-            File.Delete(Path.Combine(Paths.StartMenu, $"{Constants.PROJECT_NAME}.lnk"));
+        if (!Directory.Exists(Paths.StartMenu))
+            Directory.CreateDirectory(Paths.StartMenu);
+
+        if (File.Exists(Path.Combine(Paths.StartMenu, $"Play {Constants.PROJECT_NAME}.lnk")))
+            File.Delete(Path.Combine(Paths.StartMenu, $"Play {Constants.PROJECT_NAME}.lnk"));
         
         if (File.Exists(Path.Combine(Paths.Desktop, $"{Constants.PROJECT_NAME}.lnk")))
             File.Delete(Path.Combine(Paths.Desktop, $"{Constants.PROJECT_NAME}.lnk"));
         
-        ShellLink.Shortcut.CreateShortcut(Paths.Application, "", Paths.Application, 0).WriteToFile(Path.Combine(Paths.StartMenu, $"{Constants.PROJECT_NAME}.lnk"));
-        ShellLink.Shortcut.CreateShortcut(Paths.Application, "", Paths.Application, 0).WriteToFile(Path.Combine(Paths.Desktop, $"{Constants.PROJECT_NAME}.lnk"));
+        if (!Directory.Exists(Paths.StartMenu))
+            Directory.CreateDirectory(Paths.StartMenu);
+        
+        ShellLink.Shortcut.CreateShortcut(Paths.Application, "", Paths.Application, 0)
+            .WriteToFile(Path.Combine(Paths.StartMenu,  $"{Constants.PROJECT_NAME}.lnk"));
+        
+        ShellLink.Shortcut.CreateShortcut(Paths.Application, "", Paths.Application, 0)
+            .WriteToFile(Path.Combine(Paths.Desktop, $"{Constants.PROJECT_NAME}.lnk"));
 
         // We're finished
         MessageBox.Show($"Sucessfully installed {Constants.PROJECT_NAME}!", Constants.PROJECT_NAME, MessageBoxButtons.OK, MessageBoxIcon.Information);

@@ -1,5 +1,7 @@
 namespace Kiseki.Launcher.Windows;
 
+using System.Runtime.InteropServices;
+
 public static class Win32
 {
     // REF: https://learn.microsoft.com/en-us/windows/win32/msi/error-codes
@@ -12,4 +14,8 @@ public static class Win32
         ERROR_CANCELLED = 1223,
         ERROR_INTERNAL_ERROR = 1359
     }
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool IsWindowVisible(IntPtr hWnd);
 }
