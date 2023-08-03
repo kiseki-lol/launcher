@@ -25,8 +25,7 @@ public static class Web
 
         if (response != RESPONSE_SUCCESS)
         {
-            if (response == RESPONSE_MAINTENANCE)
-                IsInMaintenance = true;
+            if (response == RESPONSE_MAINTENANCE) IsInMaintenance = true;
 
             return false;
         }
@@ -40,7 +39,7 @@ public static class Web
     {
         var response = await Helpers.Http.GetJson<Models.HealthCheck>(Url("/api/health"));
         
-        return response is null ? RESPONSE_FAILURE : response.Status;
+        return response?.Status ?? RESPONSE_FAILURE;
     }
 
     public static bool LoadLicense(string license)
