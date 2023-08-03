@@ -18,10 +18,10 @@ public static class Web
         CurrentUrl = IsInMaintenance ? $"{Constants.MAINTENANCE_DOMAIN}.{Constants.BASE_URL}" : Constants.BASE_URL;
         
         // Synchronous block is intentional
-        Task<int> task = CheckHealth();
+        Task<Models.WebResponse> task = CheckHealth();
         task.Wait();
 
-        int response = task.Result;
+        int response = task.Result.Status;
 
         if (response != RESPONSE_SUCCESS)
         {
@@ -35,11 +35,11 @@ public static class Web
 
     public static string Url(string path) => $"https://{CurrentUrl}{path}";
 
-    public static async Task<int> CheckHealth()
+    public static async Task<Models.WebResponse> CheckHealth()
     {
         var response = await Helpers.Http.GetJson<Models.HealthCheck>(Url("/api/health"));
         
-        return response?.Status ?? RESPONSE_FAILURE;
+        return new Models.WebResponse(response?.Status ?? RESPONSE_FAILURE, response);
     }
 
     public static bool LoadLicense(string license)
