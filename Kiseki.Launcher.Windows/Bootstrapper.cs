@@ -6,7 +6,7 @@ using System.Net;
 using System.Reflection;
 using System.Security.Cryptography;
 
-using Kiseki.Launcher.Helpers;
+using Kiseki.Launcher.Utilities;
 using Kiseki.Launcher.Models;
 
 using Microsoft.Win32;

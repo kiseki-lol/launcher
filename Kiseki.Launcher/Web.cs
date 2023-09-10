@@ -37,7 +37,7 @@ public static class Web
 
     public static async Task<Models.WebResponse> CheckHealth()
     {
-        var response = await Helpers.Http.GetJson<Models.HealthCheck>(Url("/api/health"));
+        var response = await Utilities.Http.GetJson<Models.HealthCheck>(Url("/api/health"));
         
         return new Models.WebResponse(response?.Status ?? RESPONSE_FAILURE, response);
     }

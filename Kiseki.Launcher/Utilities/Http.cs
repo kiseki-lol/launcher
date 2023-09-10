@@ -1,4 +1,4 @@
-namespace Kiseki.Launcher.Helpers;
+namespace Kiseki.Launcher.Utilities;
 
 using System.Text.Json;
 
