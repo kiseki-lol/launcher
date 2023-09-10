@@ -19,8 +19,7 @@ internal static class Program
             Paths.Initialize(Path.Combine(Paths.LocalAppData, Constants.PROJECT_NAME));
         }
 
-        bool isConnected = Web.Initialize();
-        if (!isConnected && Web.IsInMaintenance)
+        if (!Web.IsConnected && Web.IsInMaintenance)
         {
             // Try licensing this launcher and attempt to connect again
             if (!Bootstrapper.License())
@@ -28,10 +27,10 @@ internal static class Program
                 return;
             }
 
-            isConnected = Web.Initialize();
+            Web.Initialize();
         }
 
-        if (!isConnected)
+        if (!Web.IsConnected)
         {
             if (Web.IsInMaintenance)
             {
@@ -54,7 +53,7 @@ internal static class Program
             // Nothing for us to do :P
             Process.Start(new ProcessStartInfo()
             {
-                FileName = Web.Url("/games"),
+                FileName = Web.FormatUrl("/games"),
                 UseShellExecute = true
             });
 
