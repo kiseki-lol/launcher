@@ -1,51 +1,33 @@
 namespace Kiseki.Launcher;
 
-using System.Text.Json;
-
 public static class Web
 {
-    public const int RESPONSE_FAILURE = -1;
-    public const int RESPONSE_SUCCESS = 0;
-    public const int RESPONSE_MAINTENANCE = 1;
-
-    public static string CurrentUrl { get; private set; } = "";
+    public static string? CurrentUrl { get; private set; } = null;
+    public static bool IsConnected { get; private set; } = false;
     public static bool IsInMaintenance { get; private set; } = false;
 
     public static readonly HttpClient HttpClient = new();
 
-    public static bool Initialize()
+    public static async void Initialize()
     {
         CurrentUrl = IsInMaintenance ? $"{Constants.MAINTENANCE_DOMAIN}.{Constants.BASE_URL}" : Constants.BASE_URL;
         
-        // Synchronous block is intentional
-        Task<Models.WebResponse> task = CheckHealth();
-        task.Wait();
-
-        int response = task.Result.Status;
-
-        if (response != RESPONSE_SUCCESS)
+        HealthCheckStatus status = await GetHealthStatus();
+        if (status != HealthCheckStatus.Success)
         {
-            if (response == RESPONSE_MAINTENANCE) IsInMaintenance = true;
+            if (status == HealthCheckStatus.Maintenance)
+            {
+                IsInMaintenance = true;
+            }
 
-            return false;
+            return;
         }
 
-        return true;
+        IsConnected = true;
     }
 
-    public static string Url(string path) => $"https://{CurrentUrl}{path}";
-
-    public static async Task<Models.WebResponse> CheckHealth()
+    public static bool License(string license)
     {
-        var response = await Utilities.Http.GetJson<Models.HealthCheck>(Url("/api/health"));
-        
-        return new Models.WebResponse(response?.Status ?? RESPONSE_FAILURE, response);
-    }
-
-    public static bool LoadLicense(string license)
-    {
-        // The license is just headers required to access the website in a JSON document
-
         Dictionary<string, string> headers;
 
         try
@@ -63,5 +45,24 @@ public static class Web
         }
 
         return true;
+    }
+
+    public static async Task<HealthCheckStatus> GetHealthStatus()
+    {
+        var response = await Http.GetJson<HealthCheck>(FormatUrl("/health-check"));
+        
+        return response?.Status ?? HealthCheckStatus.Failure;
+    }
+
+    public static string FormatUrl(string path, string? subdomain = null)
+    {
+        string scheme = "https";
+        string url = subdomain == null ? CurrentUrl! : $"{subdomain!}.{CurrentUrl!}";
+
+#if DEBUG
+        scheme = "http";
+#endif
+
+        return $"{scheme}://{url}{path}";
     }
 }

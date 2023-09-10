@@ -111,7 +111,7 @@ public class Bootstrapper : Interfaces.IBootstrapper
             }
         }
 
-        var clientRelease = await Http.GetJson<ClientRelease>(Web.Url($"/api/setup/{Arguments["Version"]}"));
+        var clientRelease = await Http.GetJson<ClientRelease>(Web.FormatUrl($"/api/setup/{Arguments["Version"]}"));
         bool clientUpToDate = true;
         bool createStudioShortcut = false;
 
@@ -226,7 +226,7 @@ public class Bootstrapper : Interfaces.IBootstrapper
             StartInfo = new()
             {
                 FileName = Path.Combine(Paths.Versions, Arguments["Version"], $"{Constants.PROJECT_NAME}.Player.exe"),
-                Arguments = $"-a \"{Web.Url("/Login/Negotiate.ashx")}\" -t \"{Arguments["Ticket"]}\" -j \"{Arguments["JoinScript"]}\"",
+                Arguments = $"-a \"{Web.FormatUrl("/Login/Negotiate.ashx")}\" -t \"{Arguments["Ticket"]}\" -j \"{Arguments["JoinScript"]}\"",
                 UseShellExecute = true,
             }
         };
@@ -446,7 +446,7 @@ public class Bootstrapper : Interfaces.IBootstrapper
         }
 
         // Load the license...
-        while (!Web.LoadLicense(File.ReadAllText(Paths.License)))
+        while (!Web.License(File.ReadAllText(Paths.License)))
         {
             // ...and if it's corrupt, keep asking for a new one.
             File.Delete(Paths.License);
