@@ -19,6 +19,8 @@ internal static class Program
             Paths.Initialize(Path.Combine(Paths.LocalAppData, Constants.PROJECT_NAME));
         }
 
+        Web.Initialize();
+
         if (!Web.IsConnected && Web.IsInMaintenance)
         {
             // Try licensing this launcher and attempt to connect again

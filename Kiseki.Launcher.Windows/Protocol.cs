@@ -37,7 +37,7 @@ public class Protocol : Interfaces.IProtocol
         catch
         {
 #if DEBUG
-            throw;
+            // throw;
 #endif
         }
     }

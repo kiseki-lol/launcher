@@ -26,13 +26,18 @@ public class Bootstrapper : Interfaces.IBootstrapper
 
     public Bootstrapper(string payload)
     {
-        Payload = payload;
+        // TODO: Do this in a better way?
+        Payload = payload.Replace($"{Constants.PROTOCOL_KEY}://", "");
+
+        if (Payload[^1] == '/')
+            Payload = Payload[..^1];
     }
 
     public bool Initialize()
     {
         if (!Base64.IsBase64String(Payload))
         {
+            MessageBox.Show(Payload);
             return false;
         }
         
@@ -40,6 +45,7 @@ public class Bootstrapper : Interfaces.IBootstrapper
         string[] pieces = Base64.ConvertBase64ToString(Payload).Split("|");
         if (pieces.Length != 4)
         {
+            MessageBox.Show(pieces.Length.ToString());
             return false;
         }
 
@@ -155,6 +161,8 @@ public class Bootstrapper : Interfaces.IBootstrapper
             }
         }
 
+        bool deleteArchive = false;
+
         if (!clientUpToDate)
         {
             // Download the required binaries
@@ -164,33 +172,39 @@ public class Bootstrapper : Interfaces.IBootstrapper
             Directory.Delete(Path.Combine(Paths.Versions, Arguments["Version"]), true);
             Directory.CreateDirectory(Path.Combine(Paths.Versions, Arguments["Version"]));
 
-            // Download archive
-            Task.WaitAny(Task.Factory.StartNew(async () => {
-                using WebClient client = new();
-                bool finished = false;
-
-                client.DownloadProgressChanged += (_, e) => {
-                    double bytesIn = double.Parse(e.BytesReceived.ToString());
-                    double totalBytes = double.Parse(e.TotalBytesToReceive.ToString());
-                    double percentage = bytesIn / totalBytes * 100;
-
-                    ProgressBarSet(int.Parse(Math.Truncate(percentage).ToString()));
-                };
-
-                client.DownloadFileCompleted += (_, _) => finished = true;
-
-                client.DownloadFileAsync(new Uri(clientRelease.Asset.Url), Path.Combine(Paths.Versions, Arguments["Version"], "archive.zip"));
-
-                while (!finished) await Task.Delay(100);
-            }));
+            // Download archive in a synchronous way so that checksum doesn't get tangled
+            // Create a new HttpClient
+            using (HttpClient client = new())
+            {
+                // Send a GET request to the URL specified in clientRelease.Asset.Url
+                using (HttpResponseMessage response = await client.GetAsync(clientRelease.Asset.Url))
+                {
+                    // Get the response content as a stream
+                    using (Stream responseStream = await response.Content.ReadAsStreamAsync())
+                    {
+                        // Create a new file stream to save the downloaded file
+                        using (FileStream archiveStream = new FileStream(Path.Combine(Paths.Versions, Arguments["Version"], "archive.zip"), FileMode.Create))
+                        {
+                            // Read the response stream and write it to the file stream
+                            byte[] buffer = new byte[4096];
+                            int bytesRead;
+                            while ((bytesRead = await responseStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                            {
+                                await archiveStream.WriteAsync(buffer, 0, bytesRead);
+                            }
+                        }
+                    }
+                }
+            }
             
             // Compare archive checksum
             using SHA256 SHA256 = SHA256.Create();
             using FileStream fileStream = File.OpenRead(Path.Combine(Paths.Versions, Arguments["Version"], "archive.zip"));
 
-            string computedChecksum = Convert.ToBase64String(SHA256.ComputeHash(fileStream));
+            byte[] hashBytes = SHA256.ComputeHash(fileStream);
+            string computedChecksum = BitConverter.ToString(hashBytes).Replace("-", "");
 
-            if (clientRelease.Asset.Checksum != computedChecksum)
+            if (clientRelease.Asset.Checksum.ToLower() != computedChecksum.ToLower())
             {
                 Error($"Failed to update {Constants.PROJECT_NAME} {Arguments["Version"]}", $"Failed to update {Constants.PROJECT_NAME}. Please try again later.");
                 return;
@@ -201,7 +215,7 @@ public class Bootstrapper : Interfaces.IBootstrapper
             ProgressBarStateChange(Enums.ProgressBarState.Marquee);
 
             ZipFile.ExtractToDirectory(Path.Combine(Paths.Versions, Arguments["Version"], "archive.zip"), Path.Combine(Paths.Versions, Arguments["Version"]));
-            File.Delete(Path.Combine(Paths.Versions, Arguments["Version"], "archive.zip"));
+            deleteArchive = true;
         }
 
         if (createStudioShortcut)
@@ -226,7 +240,7 @@ public class Bootstrapper : Interfaces.IBootstrapper
             StartInfo = new()
             {
                 FileName = Path.Combine(Paths.Versions, Arguments["Version"], $"{Constants.PROJECT_NAME}.Player.exe"),
-                Arguments = $"-a \"{Web.FormatUrl("/Login/Negotiate.ashx")}\" -t \"{Arguments["Ticket"]}\" -j \"{Arguments["JoinScript"]}\"",
+                Arguments = $"-a \"{Web.FormatUrl("/Login/Negotiate.ashx")}\" -t \"{Arguments["Ticket"]}\" -j \"{Arguments["JoinScript"]}\" ",
                 UseShellExecute = true,
             }
         };
@@ -240,6 +254,9 @@ public class Bootstrapper : Interfaces.IBootstrapper
                 launched = Win32.IsWindowVisible(player.MainWindowHandle);
             }
 
+            if (deleteArchive)
+                File.Delete(Path.Combine(Paths.Versions, Arguments["Version"], "archive.zip"));
+            
             Environment.Exit((int)Win32.ErrorCode.ERROR_SUCCESS);
         });
 
@@ -276,7 +293,7 @@ public class Bootstrapper : Interfaces.IBootstrapper
     #region Installation
 
     public static void Install()
-    {
+    {  
         // Cleanup our registry entries beforehand (if they even exist)
         Protocol.Unregister();
         Register();

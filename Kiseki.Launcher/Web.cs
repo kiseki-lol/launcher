@@ -8,11 +8,16 @@ public static class Web
 
     public static readonly HttpClient HttpClient = new();
 
-    public static async void Initialize()
+    public static void Initialize()
     {
         CurrentUrl = IsInMaintenance ? $"{Constants.MAINTENANCE_DOMAIN}.{Constants.BASE_URL}" : Constants.BASE_URL;
-        
-        HealthCheckStatus status = await GetHealthStatus();
+
+        // Synchronous block is intentional
+        Task<HealthCheckStatus> task = GetHealthStatus();
+        task.Wait();
+
+        HealthCheckStatus status = task.Result;
+
         if (status != HealthCheckStatus.Success)
         {
             if (status == HealthCheckStatus.Maintenance)
@@ -49,7 +54,7 @@ public static class Web
 
     public static async Task<HealthCheckStatus> GetHealthStatus()
     {
-        var response = await Http.GetJson<HealthCheck>(FormatUrl("/health-check"));
+        var response = await Http.GetJson<HealthCheck>(FormatUrl("/api/health"));
         
         return response?.Status ?? HealthCheckStatus.Failure;
     }
