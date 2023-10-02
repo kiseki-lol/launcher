@@ -62,6 +62,8 @@ public class Bootstrapper : Interfaces.IBootstrapper
         // Check for updates
         HeadingChange("Checking for updates...");
         
+        /*
+
         // Check for a new launcher release from GitHub
         var launcherRelease = await Http.GetJson<GitHubRelease>($"https://api.github.com/repos/{Constants.PROJECT_REPOSITORY}/releases/latest");
         bool launcherUpToDate = true;
@@ -117,6 +119,8 @@ public class Bootstrapper : Interfaces.IBootstrapper
             }
         }
 
+        */
+
         var clientRelease = await Http.GetJson<ClientRelease>(Web.FormatUrl($"/api/setup/{Arguments["Version"]}"));
         bool clientUpToDate = true;
         bool createStudioShortcut = false;
@@ -151,9 +155,10 @@ public class Bootstrapper : Interfaces.IBootstrapper
                 using SHA256 SHA256 = SHA256.Create();
                 using FileStream fileStream = File.OpenRead(Path.Combine(Paths.Versions, Arguments["Version"], file));
 
-                string computedChecksum = Convert.ToBase64String(SHA256.ComputeHash(fileStream));
+                byte[] hashBytes = SHA256.ComputeHash(fileStream);
+                string computedChecksum = BitConverter.ToString(hashBytes).Replace("-", "");
 
-                if (checksum != computedChecksum)
+                if (checksum.ToLower() != computedChecksum.ToLower())
                 {
                     clientUpToDate = false;
                     break;
@@ -245,12 +250,12 @@ public class Bootstrapper : Interfaces.IBootstrapper
             }
         };
 
-        Thread waiter = new(() => {
+        Task waiter = new(async () => {
             bool launched = false;
 
             while (!launched)
             {
-                Thread.Sleep(100);
+                await Task.Delay(100);
                 launched = Win32.IsWindowVisible(player.MainWindowHandle);
             }
 
@@ -260,10 +265,12 @@ public class Bootstrapper : Interfaces.IBootstrapper
             Environment.Exit((int)Win32.ErrorCode.ERROR_SUCCESS);
         });
 
-        player.Start();
-        player.WaitForInputIdle();
+        await Task.Run(() => {
+            player.Start();
+            player.WaitForInputIdle();
 
-        waiter.Start();
+            waiter.Start();
+        });
     }
 
     #region MainWindow
