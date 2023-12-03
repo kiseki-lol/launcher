@@ -245,7 +245,7 @@ public class Bootstrapper : Interfaces.IBootstrapper
             StartInfo = new()
             {
                 FileName = Path.Combine(Paths.Versions, Arguments["Version"], $"{Constants.PROJECT_NAME}.Player.exe"),
-                Arguments = $"-a \"{Web.FormatUrl("/Login/Negotiate.ashx")}\" -t \"{Arguments["Ticket"]}\" -j \"{Arguments["JoinScript"]}\" ",
+                Arguments = $"-a \"{Web.FormatUrl("/Login/Negotiate.ashx", null, true)}\" -t \"{Arguments["Ticket"]}\" -j \"{Arguments["JoinScript"]}\" ",
                 UseShellExecute = true,
             }
         };

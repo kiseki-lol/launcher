@@ -59,7 +59,7 @@ public static class Web
         return response?.Status ?? HealthCheckStatus.Failure;
     }
 
-    public static string FormatUrl(string path, string? subdomain = null)
+    public static string FormatUrl(string path, string? subdomain = null, bool forceHttp = false)
     {
         string scheme = "https";
         string url = subdomain == null ? CurrentUrl! : $"{subdomain!}.{CurrentUrl!}";
@@ -67,6 +67,11 @@ public static class Web
 #if DEBUG
         scheme = "http";
 #endif
+
+        if (forceHttp)
+        {
+            scheme = "http";
+        }
 
         return $"{scheme}://{url}{path}";
     }

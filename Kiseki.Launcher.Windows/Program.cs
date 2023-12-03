@@ -7,6 +7,12 @@ internal static class Program
     [STAThread]
     static void Main(string[] args)
     {
+        if (args.Length > 0 && args[0] == "-uninstall")
+        {
+            Bootstrapper.Uninstall(args[0] == "-quiet");
+            return;
+        }
+
         // Initialize directories
         if (Path.GetFileName(Path.GetDirectoryName(Application.ExecutablePath))!.ToLower().Contains(Constants.PROJECT_NAME.ToLower()))
         {
@@ -59,12 +65,6 @@ internal static class Program
                 UseShellExecute = true
             });
 
-            return;
-        }
-
-        if (args[0] == "-uninstall")
-        {
-            Bootstrapper.Uninstall(args[0] == "-quiet");
             return;
         }
 
