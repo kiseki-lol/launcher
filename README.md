@@ -1,7 +1,6 @@
 # Kiseki.Launcher
 
 [![License](https://img.shields.io/github/license/kiseki-lol/launcher)](https://github.com/kiseki-lol/launcher/blob/trunk/LICENSE)
-[![GitHub Build Status](https://img.shields.io/github/actions/workflow/status/kiseki-lol/launcher/build.yml?branch=trunk&label=builds)](https://github.com/kiseki-lol/launcher/actions)
 [![Star](https://img.shields.io/github/stars/kiseki-lol/launcher?style=social)](https://github.com/kiseki-lol/launcher/stargazers)
 
 Launches Kiseki game clients from the website
